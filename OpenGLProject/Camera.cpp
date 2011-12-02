@@ -28,7 +28,7 @@ Camera::~Camera()
 void Camera::init()
 {
 	fov = 70.0f;
-	near = 0.0001f;
+	near = 0.1f;
 	far = 100.0f;
 //TODO	glViewport(0, 0, vpWidth, vpHeight);
 	setProjection();
