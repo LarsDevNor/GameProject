@@ -29,5 +29,6 @@ private:
 	bool running;
 
 	Camera* gameCamera;
+	Terrain* terrain;
 };
 

@@ -1,9 +1,7 @@
 #include "stdafx.h"
 
-#include "glm/glm.hpp"
 #include "glm/gtc/matrix_projection.hpp"
 #include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
 
 #include "Camera.h"
 #include "GameManager.h"
@@ -34,7 +32,7 @@ void GameManager::update(float dt)
 void GameManager::render()
 {
 
-}
+}	
 
 void GameManager::flushGLError()
 {

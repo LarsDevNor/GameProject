@@ -9,7 +9,12 @@
 
 #include <stdio.h>
 #include <tchar.h>
+#include <vector>
 
+#include "GL/glew.h"
+#include "GL/glfw.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
-// TODO: reference additional headers your program requires here
+// TODO: reference additional headers your program requires here: glm, glew, opengl, etc 
