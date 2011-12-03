@@ -24,7 +24,7 @@ void Terrain::initGeometry()
 		for ( int j = 0; j < nVertsWidth; ++j )
 		{
 			glm::vec2 normPos((float)j/(nVertsWidth-1), (float)i/(nVertsHeight-1));
-			glm::vec2 pos = glm::vec2(normPos.x * width, normPos.x * height);
+			glm::vec2 pos = glm::vec2(normPos.x * width, normPos.y * height);
 
 			vertices.push_back(PTVertex(glm::vec3(pos.x, pos.y, -100.0f), normPos));
 		}
