@@ -1,8 +1,7 @@
 #pragma once
 
 /*
-	Handles input 
-	Silly with stupid bools etc, but its not really all that important
+	Needs work!
 
 	Lars Hofsøy Breivik
 */
