@@ -56,6 +56,7 @@ bool init()
 	}
 
 	gm = GameManager::getInstance();
+	gm->init(glm::ivec2(width, height));
 
 	initGLState();
 

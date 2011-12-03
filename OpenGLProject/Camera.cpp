@@ -3,6 +3,8 @@
 #include <iostream>
 
 #include "GL/glew.h"
+
+#include "GameManager.h"
 #include "Camera.h"
 
 #define PI 3.14159265
@@ -18,6 +20,8 @@ void printMatrix(const glm::mat4& mat)
 
 Camera::Camera() : moveSpeed(0.25f), zoomSpeed(0.0275f)
 {
+	gm = GameManager::getInstance();
+
 	init();
 }
 
@@ -27,12 +31,14 @@ Camera::~Camera()
 
 void Camera::init()
 {
-	fov = 70.0f;
+	vpDim = gm->getWindowDim();
+	fov = 60.0f;
 	near = 0.1f;
-	far = 100.0f;
-//TODO	glViewport(0, 0, vpWidth, vpHeight);
+	far = 1000.0f;
+	glViewport(0, 0, vpDim.x, vpDim.y);
 	setProjection();
 	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+	printMatrix(viewMatrix);
 	dRot = 0.0f;
 	rotateSpeed = 1.0f;
 }
@@ -87,8 +93,8 @@ void Camera::lookAt()
 
 void Camera::setProjection()
 {
-//TODO	float aspect = (float)sm->getWidth() / (float)sm->getHeight();
-//TODO	projMatrix = glm::perspective(fov, aspect, near, far);
+	float aspect =  (float)vpDim.x / vpDim.y;
+	projMatrix = glm::perspective(fov, aspect, near, far);
 }
 
 void Camera::rotate(float deg, const glm::vec3& axis)

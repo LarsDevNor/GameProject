@@ -17,8 +17,8 @@ void Terrain::initGeometry()
 {
 	nVertsHeight = 10;
 	nVertsWidth = 10;
-	width = 100.0f;
-	height = 100.0f;
+	width = 10.0f;
+	height = 10.0f;
 	{ // create geometry 
 		for ( int i = 0; i < nVertsHeight; ++i ) 
 		for ( int j = 0; j < nVertsWidth; ++j )
@@ -26,7 +26,7 @@ void Terrain::initGeometry()
 			glm::vec2 normPos((float)j/(nVertsWidth-1), (float)i/(nVertsHeight-1));
 			glm::vec2 pos = glm::vec2(normPos.x * width, normPos.x * height);
 
-			vertices.push_back(PTVertex(glm::vec3(pos.x, 0.0f, pos.y), normPos));
+			vertices.push_back(PTVertex(glm::vec3(pos.x, pos.y, -100.0f), normPos));
 		}
 	}
 	{ // bind geometry to buffers 
@@ -61,6 +61,8 @@ void Terrain::initShader()
 
 void Terrain::render()
 {
+	glPointSize(5.0f);
+
 	shaderDefault->begin();
 	{
 		int viewLoc = shaderDefault->getUniLoc("view");
@@ -69,8 +71,8 @@ void Terrain::render()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getViewMatrix()));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
 
-		//glBindVertexArray(vao);
-		//glDrawArrays(GL_POINTS, 0, vertices.size());
+		glBindVertexArray(vao);
+		glDrawArrays(GL_POINTS, 0, vertices.size());
 	} shaderDefault->end();
 	// glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 }

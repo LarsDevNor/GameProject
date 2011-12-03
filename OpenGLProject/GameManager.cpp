@@ -14,7 +14,6 @@ GameManager* GameManager::getInstance()
 	if ( !instance )
 	{
 		instance = new GameManager();
-		instance->init();
 	}
 	return instance;
 }
@@ -24,8 +23,10 @@ GameManager::GameManager() : flushError(false), running(true)
 	
 }
 
-void GameManager::init() 
+void GameManager::init(const glm::ivec2& _windowDim) 
 {
+	windowDim = _windowDim;
+
 	cameraDefault = new Camera();
 	terrain = new Terrain();
 	inputManager = new InputManager();

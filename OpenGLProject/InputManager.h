@@ -1,11 +1,5 @@
 #pragma once
 
-/*
-	Needs work!
-
-	Lars Hofsøy Breivik
-*/
-
 class InputManager
 {
 public:

@@ -1,17 +1,11 @@
-#if 1
-
-/*
-	Simple camera 
-
-	Lars Hofsøy Breivik
-*/
-
 #pragma once
 
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_projection.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/type_ptr.hpp"
+
+class GameManager;
 
 class Camera
 {
@@ -57,8 +51,9 @@ private:
 	float near;
 	float far;
 
-	size_t vpWidth;
-	size_t vpHeight;
-};
+	glm::ivec2 vpDim;
 
-#endif 
+
+private:
+	GameManager* gm;
+};
