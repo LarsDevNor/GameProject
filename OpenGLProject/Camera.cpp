@@ -39,7 +39,7 @@ void Camera::init()
 	glViewport(0, 0, vpDim.x, vpDim.y);
 	setProjection();
 
-	eye = glm::vec3(0.0f, 0.0f, 60.0f);
+	eye = glm::vec3(0.0f, 0.0f, 0.0f);
 	rotation = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	viewMatrix = glm::rotate(viewMatrix, rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
