@@ -1,16 +1,24 @@
 #include "stdafx.h"
 
+#include "GameManager.h"
+#include "Camera.h"
 #include "Shader.h"
 #include "Terrain.h"
 
 Terrain::Terrain() 
 {
+	gm = GameManager::getInstance();
+
 	initGeometry();
 	initShader();
 }
 
 void Terrain::initGeometry()
 {
+	nVertsHeight = 10;
+	nVertsWidth = 10;
+	width = 100.0f;
+	height = 100.0f;
 	{ // create geometry 
 		for ( int i = 0; i < nVertsHeight; ++i ) 
 		for ( int j = 0; j < nVertsWidth; ++j )
@@ -46,14 +54,23 @@ void Terrain::initGeometry()
 void Terrain::initShader()
 {
 	shaderDefault = new Shader();
-	shaderDefault->addStage("./shaders/clTerrainInst.vert", "", GL_VERTEX_SHADER);
-	shaderDefault->addStage("./shaders/clTerrainInst.frag", "", GL_FRAGMENT_SHADER);
+	shaderDefault->addStage("./shaders/terrain.vert", "", GL_VERTEX_SHADER);
+	shaderDefault->addStage("./shaders/terrain.frag", "", GL_FRAGMENT_SHADER);
 	shaderDefault->install();
 }
 
 void Terrain::render()
 {
-	glBindVertexArray(vao);
-	glDrawArrays(GL_POINTS, 0, vertices.size());
+	shaderDefault->begin();
+	{
+		int viewLoc = shaderDefault->getUniLoc("view");
+		int projLoc = shaderDefault->getUniLoc("proj");
+		int modelLoc = shaderDefault->getUniLoc("model");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getViewMatrix()));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
+
+		//glBindVertexArray(vao);
+		//glDrawArrays(GL_POINTS, 0, vertices.size());
+	} shaderDefault->end();
 	// glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 }

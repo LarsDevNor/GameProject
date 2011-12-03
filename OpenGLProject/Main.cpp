@@ -55,7 +55,7 @@ bool init()
 		fprintf(stderr, "Error: %s\n", glewGetErrorString(e));
 	}
 
-	gm = new GameManager();
+	gm = GameManager::getInstance();
 
 	initGLState();
 

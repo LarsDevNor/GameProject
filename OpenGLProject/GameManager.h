@@ -6,11 +6,14 @@
 #include "GL/glfw.h"
 
 class Camera;
+class Terrain;
+class InputManager;
 
 class GameManager
 {
 public:
-	GameManager();
+	static GameManager* getInstance();
+	void init();
 	virtual ~GameManager();
 
 	void Tick(float dt);
@@ -18,8 +21,12 @@ public:
 	void toggleVSync() { vSync = !vSync; vSync ? glfwSwapInterval(1) : glfwSwapInterval(0); }
 	void setRunning(bool _running) { running = _running; }
 	bool getRunning() const { return running; }
+	Camera* getActiveCamera() { return cameraDefault; }
 
 private:
+	static GameManager* instance;
+	GameManager();
+
 	void update(float dt);
 	void render();
 	void flushGLError();
@@ -28,7 +35,8 @@ private:
 	bool vSync;
 	bool running;
 
-	Camera* gameCamera;
+	Camera* cameraDefault;
 	Terrain* terrain;
+	InputManager* inputManager;
 };
 

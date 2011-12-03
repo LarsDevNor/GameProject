@@ -22,6 +22,12 @@ void InputManager::handleInput(float dt)
 	handleMouse(dt);
 }
 
+void InputManager::update(float dt)
+{
+	handleMouse(dt);
+	handleKeyboard(dt);
+}
+
 void InputManager::handleMouse(float dt)
 {
 	//if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))

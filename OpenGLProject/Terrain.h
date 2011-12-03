@@ -24,6 +24,7 @@ namespace semantic
 };
 
 class Shader;
+class GameManager;
 
 class Terrain
 {
@@ -36,12 +37,15 @@ public:
 	void render();
 
 private:
-	size_t width;
-	size_t height;
+	float width;
+	float height;
 	size_t nVertsWidth;
 	size_t nVertsHeight;
 	GLuint vbo;
 	GLuint vao;
 	std::vector<PTVertex> vertices;
 	Shader* shaderDefault;
+
+private:
+	GameManager* gm;
 };
