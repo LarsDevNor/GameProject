@@ -25,6 +25,7 @@ namespace semantic
 
 class Shader;
 class GameManager;
+class PerlinNoise;
 
 class Terrain
 {
@@ -50,4 +51,6 @@ private:
 
 private:
 	GameManager* gm;
+
+	PerlinNoise* pn;
 };

@@ -1,6 +1,7 @@
 #include "stdafx.h"
 
 #include "GameManager.h"
+#include "PerlinNoise.h"
 #include "Camera.h"
 #include "Shader.h"
 #include "Terrain.h"
@@ -8,6 +9,7 @@
 Terrain::Terrain() 
 {
 	gm = GameManager::getInstance();
+	pn = new PerlinNoise(0.5, 0.1, 0.1, 64, 5);
 
 	initGeometry();
 	initShader();
@@ -26,9 +28,10 @@ void Terrain::initGeometry()
 			glm::vec2 normPos((float)j/(nVertsWidth-1), (float)i/(nVertsHeight-1));
 			glm::vec2 pos = glm::vec2(normPos.x * width, normPos.y * height);
 
-			vertices.push_back(PTVertex(glm::vec3(pos.x, pos.y, -20.0f), normPos));
+			printf("noise: %g\n",  pn->GetHeight(j,i));
+			vertices.push_back(PTVertex(glm::vec3(pos.x, pos.y, -20.0f + pn->GetHeight(normPos.x, normPos.y)), normPos));
 		}
-
+		
 		for ( size_t i = 0; i < nVertsHeight-1; ++i )
 		for ( size_t j = 0; j < nVertsWidth-1; ++j )
 		{
