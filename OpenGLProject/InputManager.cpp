@@ -46,6 +46,15 @@ void InputManager::handleKeyboard(float dt)
 		gm->getActiveCamera()->moveForward(-dt);
 	}
 
+	if(glfwGetKey('A'))
+	{
+		gm->getActiveCamera()->moveLeft(dt);
+	}
+	else if(glfwGetKey('D'))
+	{
+		gm->getActiveCamera()->moveLeft(-dt);
+	}
+
 	 if(glfwGetKey(GLFW_KEY_LEFT))
 	{
 		gm->getActiveCamera()->rotateY(-dt);

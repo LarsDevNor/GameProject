@@ -40,10 +40,10 @@ void Camera::init()
 	setProjection();
 
 	eye = glm::vec3(0.0f, 0.0f, 0.0f);
-	rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+	rotation = glm::vec3(20.0f, 135.0f, 0.0f);
 
-	viewMatrix = glm::rotate(viewMatrix, rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
-	viewMatrix = glm::translate(glm::mat4(1.0f),eye);
+	updateView();
+
 	printMatrix(viewMatrix);
 	
 }
@@ -59,6 +59,13 @@ void Camera::moveForward(float dt)
 {
 	glm::vec3 forward(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
 	eye += dt * moveSpeed * forward;
+	updateView();
+}
+
+void Camera::moveLeft(float dt)
+{
+	glm::vec3 left(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+	eye += left * dt * moveSpeed;
 	updateView();
 }
 

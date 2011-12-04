@@ -16,9 +16,10 @@ public:
 	void init();
 	void setProjection();
 
-	void rotateX(float deg);
-	void rotateY(float deg);
-	void moveForward(float dirAndStrength);
+	void rotateX(float dt);
+	void rotateY(float dt);
+	void moveForward(float dt);
+	void moveLeft(float dt);
 
 	glm::vec3 getEye() const { return eye; }
 	glm::mat4 &getViewMatrix() { return viewMatrix; }
