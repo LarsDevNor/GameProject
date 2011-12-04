@@ -18,78 +18,34 @@ void printMatrix(const glm::mat4& mat)
 		mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
 }
 
-Camera::Camera() : moveSpeed(0.25f), zoomSpeed(0.0275f)
+Camera::Camera() : moveSpeed(10.0f)
 {
 	gm = GameManager::getInstance();
-
 	init();
 }
 
 Camera::~Camera()
 {
-	
 }
 
 void Camera::init()
 {
 	vpDim = gm->getWindowDim();
+	rotateSpeed = 30.0f;
+	moveSpeed = 10.0f;
 	fov = 60.0f;
 	near = 0.1f;
 	far = 1000.0f;
 	glViewport(0, 0, vpDim.x, vpDim.y);
 	setProjection();
-	viewMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
+
+	eye = glm::vec3(0.0f, 0.0f, 0.0f);
+	rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	viewMatrix = glm::rotate(viewMatrix, rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	viewMatrix = glm::translate(glm::mat4(1.0f),eye);
 	printMatrix(viewMatrix);
-	dRot = 0.0f;
-	rotateSpeed = 1.0f;
-}
-
-void Camera::lookAt(const glm::vec3 &_eye, const glm::vec3 &_target, const glm::vec3 &_up)
-{
-	eye = _eye;
-	target = _target;
-	up = _up;
-
-	lookAt();
-}
-
-void Camera::lookAt()
-{
-	glm::vec3 zAxis = target - eye;
-	zAxis = glm::normalize(zAxis);
-
-	glm::vec3 xAxis = glm::cross(zAxis, up);
-	xAxis = glm::normalize(xAxis);
-
-	glm::vec3 yAxis = glm::cross(xAxis, zAxis);
-	yAxis = glm::normalize(yAxis);
-
-	up = yAxis;
-
-	viewMatrix[0][0] = xAxis.x;
-	viewMatrix[1][0] = xAxis.y;
-	viewMatrix[2][0] = xAxis.z;
-
-	viewMatrix[0][1] = yAxis.x;
-	viewMatrix[1][1] = yAxis.y;
-	viewMatrix[2][1] = yAxis.z;
-
-	viewMatrix[0][2] = -zAxis.x;
-	viewMatrix[1][2] = -zAxis.y;
-	viewMatrix[2][2] = -zAxis.z;
-
-	viewMatrix[3][0] = 0.0f;
-	viewMatrix[3][1] = 0.0f;
-	viewMatrix[3][2] = 0.0f;
 	
-	viewMatrix[0][3] = 0.0f;
-	viewMatrix[1][3] = 0.0f;
-	viewMatrix[2][3] = 0.0f;
-	viewMatrix[3][3] = 1.0f;
-
-	glm::mat4 translMat = glm::translate(glm::mat4(1.0), -eye);
-
-	viewMatrix = viewMatrix * translMat;
 }
 
 void Camera::setProjection()
@@ -98,65 +54,42 @@ void Camera::setProjection()
 	projMatrix = glm::perspective(fov, aspect, near, far);
 }
 
-void Camera::rotate(float deg, const glm::vec3& axis)
+
+void Camera::moveForward(float dt)
 {
-	viewMatrix = glm::rotate(viewMatrix, deg, axis);
+	glm::vec3 forward(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
+	eye += dt * moveSpeed * forward;
+	updateView();
 }
 
-void Camera::moveLeft(float dirAndStrength)
+void Camera::updateView()
 {
-	glm::vec3 zAxis = target - eye;
-	zAxis.y = 0;
-	zAxis = glm::normalize(zAxis);
-
-	glm::vec3 xAxis = glm::cross(zAxis, up);
-	xAxis.y = 0;
-	xAxis = glm::normalize(xAxis);
-
-	up = glm::vec3(0.0f, 1.0f, 0.0f);
-
-	eye -= xAxis*moveSpeed*dirAndStrength;
-	target -= xAxis*moveSpeed*dirAndStrength;
-
-	lookAt();
+	viewMatrix = glm::rotate(glm::mat4(1.0), rotation[0], glm::vec3(1.0f, 0.0f, 0.0f));
+	viewMatrix = glm::rotate(viewMatrix,	 rotation[1], glm::vec3(0.0f, 1.0f, 0.0f));
+	viewMatrix = glm::rotate(viewMatrix,     rotation[2], glm::vec3(0.0f, 0.0f, 1.0f));
+	viewMatrix = glm::translate(viewMatrix,eye);
 }
 
-float someVar = 0.001;
-void Camera::setTarget(const glm::vec3& _target)
+void Camera::rotateY( float dt )
 {
-	target = _target;
+	rotation[1] += dt * rotateSpeed;
+	if(rotation[1] > 360.0f)
+		rotation[1] -= 360.0;
 
-	lookAt();
+	if(rotation[1] <= -360.0f)
+		rotation[1] += 360.0f;
+
+	updateView();
 }
 
-void Camera::rotateView(float dirAndSpeed)
+void Camera::rotateX( float dt )
 {
-	dRot += dirAndSpeed*rotateSpeed;
-	up = glm::vec3(0.0f, 1.0f, 0.0f);
-	target.x = eye.x + sin(dRot);
-	target.z = eye.z + cos(dRot);
-		
-	lookAt();
-}
+	rotation[0] += dt * rotateSpeed;
+	if(rotation[0] > 360.0f)
+		rotation[0] -= 360.0;
 
-void Camera::moveForward(float dirAndStrength)
-{
-	glm::vec3 zAxis = target - eye;
-	zAxis.y = 0;
-	zAxis = glm::normalize(zAxis);
+	if(rotation[0] <= -360.0f)
+		rotation[0] += 360.0f;
 
-	glm::vec3 xAxis = glm::cross(zAxis, up);
-	xAxis.y = 0;
-	xAxis = glm::normalize(xAxis);
-
-	eye += zAxis * dirAndStrength * moveSpeed;
-	target += zAxis * dirAndStrength * moveSpeed;
-
-	lookAt();
-}
-
-void Camera::zoom(int amount)
-{
-	eye.y -= zoomSpeed * amount * eye.y*0.8f;
-	lookAt();
+	updateView();
 }

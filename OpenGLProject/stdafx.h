@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <tchar.h>
 #include <vector>
+#include <map>
 
 #include "GL/glew.h"
 #include "GL/glfw.h"

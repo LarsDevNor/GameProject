@@ -28,8 +28,21 @@ void Terrain::initGeometry()
 			glm::vec2 normPos((float)j/(nVertsWidth-1), (float)i/(nVertsHeight-1));
 			glm::vec2 pos = glm::vec2(normPos.x * width, normPos.y * height);
 
+			vertices.push_back(PTVertex(glm::vec3(pos.x, pos.y, -20.0f), normPos));
 			printf("noise: %g\n",  pn->GetHeight(j,i));
 			vertices.push_back(PTVertex(glm::vec3(pos.x, pos.y, -20.0f + pn->GetHeight(normPos.x, normPos.y)), normPos));
+		}
+
+		for ( size_t i = 0; i < nVertsHeight-1; ++i )
+		for ( size_t j = 0; j < nVertsWidth-1; ++j )
+		{
+			indices.push_back(j		+ i*nVertsWidth);
+			indices.push_back((j+1) + i*nVertsWidth);
+			indices.push_back((j+1)	+ (i+1)*nVertsWidth);
+
+			indices.push_back(j		+ i*nVertsWidth);
+			indices.push_back((j+1) + (i+1)*nVertsWidth);
+			indices.push_back((j)	+ (i+1)*nVertsWidth);
 		}
 		
 		for ( size_t i = 0; i < nVertsHeight-1; ++i )
