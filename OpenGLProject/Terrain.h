@@ -2,12 +2,13 @@
 
 // TODO: extract to common header 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
-struct PTVertex
+struct PNTVertex
 {
-	PTVertex( glm::vec3 const & position, glm::vec2 const & texcoord ) :
-		position(position), texcoord(texcoord) {}
+	PNTVertex( glm::vec3 const & position, glm::vec3 normal, glm::vec2 const & texcoord ) :
+		position(position), normal(normal), texcoord(texcoord) {}
 
 	glm::vec3 position;
+	glm::vec3 normal;
 	glm::vec2 texcoord;
 };
 namespace semantic 
@@ -17,8 +18,9 @@ namespace semantic
 		enum type
 		{
 			POSITION = 0,
-			COLOR	 = 3,
-			TEXCOORD = 4
+			NORMAL = 3,
+			COLOR	 = 6,
+			TEXCOORD = 7
 		};
 	};
 };
@@ -38,6 +40,9 @@ public:
 	void render();
 
 private:
+	void calcNormals();
+
+private:
 	float width;
 	float height;
 	size_t nVertsWidth;
@@ -45,7 +50,9 @@ private:
 	GLuint vbo;
 	GLuint ibo;
 	GLuint vao;
-	std::vector<PTVertex> vertices;
+	std::vector<glm::vec3> normals;
+	std::vector<float> heights;
+	std::vector<PNTVertex> vertices;
 	std::vector<unsigned int> indices;
 	Shader* shaderDefault;
 

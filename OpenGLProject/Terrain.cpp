@@ -9,7 +9,6 @@
 Terrain::Terrain() 
 {
 	gm = GameManager::getInstance();
-	pn = new PerlinNoise(0.5, 0.1, 20.0, 8, 5);
 
 	initGeometry();
 	initShader();
@@ -17,18 +16,52 @@ Terrain::Terrain()
 
 void Terrain::initGeometry()
 {
-	nVertsHeight = 128;
-	nVertsWidth = 128;
+	nVertsHeight = 512;
+	nVertsWidth = 512;
 	width = 200.0f;
 	height = 200.0f;
+	pn = new PerlinNoise(0.5, 0.1, 5000/(nVertsHeight+nVertsWidth), 8, 5);
+
+	glm::vec2 spacing((float)width / nVertsWidth, (float)height / nVertsHeight);
 	{ // create geometry 
 		for ( size_t i = 0; i < nVertsHeight; ++i ) 
+		for ( size_t j = 0; j < nVertsWidth; ++j )
+		{
+			float vertexHeight = -10.0f + (float)pn->GetHeight(j,i);
+			heights.push_back(vertexHeight);
+		}
+		
+		normals = std::vector<glm::vec3>(nVertsWidth*nVertsHeight);
+		std::fill(normals.begin(), normals.end(), glm::vec3(0.0f, 0.0f, 0.0f));
+		for ( size_t i = 1; i < nVertsHeight-1; ++i )
+		for ( size_t j = 1; j < nVertsWidth-1; ++j )
+		{
+			glm::vec3 vecs[8];
+			float h0 = heights[ j + i*nVertsWidth];
+			vecs[0] = glm::vec3(  0.0f,      heights[j     + (i+1)*nVertsWidth]-h0,  spacing.y );
+			vecs[1] = glm::vec3( -spacing.x, heights[(j-1) + (i+1)*nVertsWidth]-h0,  spacing.y );
+			vecs[2] = glm::vec3( -spacing.x, heights[(j-1) +  i  *nVertsWidth]-h0,   0.0f	   );
+			vecs[3] = glm::vec3( -spacing.x, heights[(j-1) + (i-1)*nVertsWidth]-h0, -spacing.y );
+			vecs[4] = glm::vec3(  0.0f,      heights[j     + (i-1)*nVertsWidth]-h0, -spacing.y );
+			vecs[5] = glm::vec3(  spacing.x, heights[(j+1) + (i-1)*nVertsWidth]-h0, -spacing.y );
+			vecs[6] = glm::vec3(  spacing.x, heights[(j+1) +  i   *nVertsWidth]-h0,  0.0f      );
+			vecs[7] = glm::vec3(  spacing.x, heights[(j+1) + (i+1)*nVertsWidth]-h0,  spacing.y );
+
+			glm::vec3 normalsAcc(0.0f, 0.0,0.0f);
+			for ( int k = 1; k < 8; ++k )
+			{
+				normalsAcc += glm::normalize(glm::cross(vecs[k-1], vecs[k]));
+			}
+			normals[j+i*nVertsWidth] = normalsAcc /= 8.0f;
+		}
+
+		for ( size_t i = 0; i < nVertsHeight; ++i )
 		for ( size_t j = 0; j < nVertsWidth; ++j )
 		{
 			glm::vec2 normPos((float)j/(nVertsWidth-1), (float)i/(nVertsHeight-1));
 			glm::vec2 pos = glm::vec2(normPos.x * width, normPos.y * height);
 
-			vertices.push_back(PTVertex(glm::vec3(pos.x, -10.0f + pn->GetHeight(j,i), pos.y), normPos));
+			vertices.push_back(PNTVertex(glm::vec3(pos.x, heights[j+i*nVertsWidth], pos.y), normals[j+i*nVertsWidth], normPos));
 		}
 		
 		for ( size_t i = 0; i < nVertsHeight-1; ++i )
@@ -43,6 +76,7 @@ void Terrain::initGeometry()
 			indices.push_back(j		+ i*nVertsWidth);
 		}
 	}
+
 	{ // bind geometry to buffers 
 		glGenBuffers(1, &vbo);
 		glGenBuffers(1, &ibo);
@@ -50,7 +84,7 @@ void Terrain::initGeometry()
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		{
-			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(PTVertex), &vertices[0], GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(PNTVertex), &vertices[0], GL_STATIC_DRAW);
 		} glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 		{
@@ -61,12 +95,17 @@ void Terrain::initGeometry()
 		{
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			{
-				glVertexAttribPointer(semantic::attr::POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(PTVertex), BUFFER_OFFSET(0));
-				glVertexAttribPointer(semantic::attr::TEXCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(PTVertex), BUFFER_OFFSET(sizeof(glm::vec3)));
+				unsigned int offset = 0;
+				glVertexAttribPointer(semantic::attr::POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(PNTVertex), BUFFER_OFFSET(offset));
+				offset += sizeof(glm::vec3);
+				glVertexAttribPointer(semantic::attr::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(PNTVertex), BUFFER_OFFSET(offset));
+				offset += sizeof(glm::vec3);
+				glVertexAttribPointer(semantic::attr::TEXCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(PNTVertex), BUFFER_OFFSET(offset));
 			}
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 			glEnableVertexAttribArray(semantic::attr::POSITION);
+			glEnableVertexAttribArray(semantic::attr::NORMAL);
 			glEnableVertexAttribArray(semantic::attr::TEXCOORD);
 		} glBindVertexArray(0);
 	}
