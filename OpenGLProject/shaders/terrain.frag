@@ -11,5 +11,5 @@ in vec2 fTexCoord;
 
 void main()
 {
-	color = vec4(1.0, 0.0, 0.0, 1.0);
+	color = vec4(fTexCoord.xy, 0.0, 1.0);
 }
