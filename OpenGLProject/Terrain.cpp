@@ -9,7 +9,7 @@
 Terrain::Terrain() 
 {
 	gm = GameManager::getInstance();
-	pn = new PerlinNoise(0.5, 0.1, 0.1, 8, 5);
+	pn = new PerlinNoise(0.5, 0.1, 20.0, 8, 5);
 
 	initGeometry();
 	initShader();
@@ -17,10 +17,10 @@ Terrain::Terrain()
 
 void Terrain::initGeometry()
 {
-	nVertsHeight = 10;
-	nVertsWidth = 10;
-	width = 100.0f;
-	height = 100.0f;
+	nVertsHeight = 512;
+	nVertsWidth = 512;
+	width = 500.0f;
+	height = 500.0f;
 	{ // create geometry 
 		for ( size_t i = 0; i < nVertsHeight; ++i ) 
 		for ( size_t j = 0; j < nVertsWidth; ++j )
@@ -28,8 +28,7 @@ void Terrain::initGeometry()
 			glm::vec2 normPos((float)j/(nVertsWidth-1), (float)i/(nVertsHeight-1));
 			glm::vec2 pos = glm::vec2(normPos.x * width, normPos.y * height);
 
-			printf("noise: %g\n",  pn->GetHeight(j, i));
-			vertices.push_back(PTVertex(glm::vec3(pos.x, -10.0f /*+ pn->GetHeight(normPos.x, normPos.y)*/, pos.y), normPos));
+			vertices.push_back(PTVertex(glm::vec3(pos.x, -10.0f + pn->GetHeight(j,i), pos.y), normPos));
 		}
 		
 		for ( size_t i = 0; i < nVertsHeight-1; ++i )
@@ -42,7 +41,6 @@ void Terrain::initGeometry()
 			indices.push_back((j)	+ (i+1)*nVertsWidth);
 			indices.push_back((j+1) + (i+1)*nVertsWidth);
 			indices.push_back(j		+ i*nVertsWidth);
-			
 		}
 	}
 	{ // bind geometry to buffers 
