@@ -70,25 +70,23 @@ void Camera::updateView()
 	viewMatrix = glm::translate(viewMatrix,eye);
 }
 
-void Camera::rotateY( float dt )
+void Camera::rotateY(float dt)
 {
 	rotation[1] += dt * rotateSpeed;
 	if(rotation[1] > 360.0f)
-		rotation[1] -= 360.0;
-
-	if(rotation[1] <= -360.0f)
+		rotation[1] -= 360.0f;
+	else if(rotation[1] <= -360.0f)
 		rotation[1] += 360.0f;
 
 	updateView();
 }
 
-void Camera::rotateX( float dt )
+void Camera::rotateX(float dt)
 {
 	rotation[0] += dt * rotateSpeed;
 	if(rotation[0] > 360.0f)
-		rotation[0] -= 360.0;
-
-	if(rotation[0] <= -360.0f)
+		rotation[0] -= 360.0f;
+	else if(rotation[0] <= -360.0f)
 		rotation[0] += 360.0f;
 
 	updateView();
