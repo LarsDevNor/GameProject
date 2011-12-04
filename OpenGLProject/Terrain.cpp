@@ -52,7 +52,30 @@ void Terrain::initGeometry()
 			{
 				normalsAcc += glm::normalize(glm::cross(vecs[k-1], vecs[k]));
 			}
-			normals[j+i*nVertsWidth] = normalsAcc /= 8.0f;
+			normals[j+i*nVertsWidth] = glm::normalize(normalsAcc / 8.0f);
+		}
+
+		const size_t smoothingIterations = 5;
+		for ( size_t iteration = 0; iteration < smoothingIterations; ++iteration)
+		for ( size_t i = 1; i < nVertsHeight-1; ++i )
+		for ( size_t j = 1; j < nVertsWidth-1; ++j )
+		{
+			glm::vec3 adjNormals[8];
+			adjNormals[0] = normals[j     + (i+1)*nVertsWidth];
+			adjNormals[1] = normals[(j-1) + (i+1)*nVertsWidth];
+			adjNormals[2] = normals[(j-1) +  i   *nVertsWidth];
+			adjNormals[3] = normals[(j-1) + (i-1)*nVertsWidth];
+			adjNormals[4] = normals[j     + (i-1)*nVertsWidth];
+			adjNormals[5] = normals[(j+1) + (i-1)*nVertsWidth];
+			adjNormals[6] = normals[(j+1) +  i   *nVertsWidth];
+			adjNormals[7] = normals[(j+1) + (i+1)*nVertsWidth];
+
+			glm::vec3 normalsAcc(0.0f, 0.0f, 0.0f);
+			for ( int k = 1; k < 8; ++k )
+			{
+				normalsAcc += adjNormals[k];
+			}
+			normals[j+i*nVertsWidth] = glm::normalize( glm::normalize(normalsAcc) * 0.5f + normals[j+i*nVertsWidth] * 0.5f );
 		}
 
 		for ( size_t i = 0; i < nVertsHeight; ++i )

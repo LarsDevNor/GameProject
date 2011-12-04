@@ -16,6 +16,6 @@ void main()
 	color = vec4(fTexCoord.xy, fNormal.z, 1.0);
 
 	vec3 lightDir = vec3(0.0, -1.0, 0.0);
-	float lDotN = dot(lightDir, fNormal);
+	float lDotN = dot(lightDir, normalize(fNormal));
 	color = vec4(vec3(lDotN), 1.0);
 }
