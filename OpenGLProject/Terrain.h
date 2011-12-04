@@ -17,8 +17,8 @@ namespace semantic
 		enum type
 		{
 			POSITION = 0,
-			COLOR	 = 5,
-			TEXCOORD = 6
+			COLOR	 = 3,
+			TEXCOORD = 4
 		};
 	};
 };
