@@ -17,10 +17,10 @@ Terrain::Terrain()
 
 void Terrain::initGeometry()
 {
-	nVertsHeight = 512;
-	nVertsWidth = 512;
-	width = 500.0f;
-	height = 500.0f;
+	nVertsHeight = 128;
+	nVertsWidth = 128;
+	width = 200.0f;
+	height = 200.0f;
 	{ // create geometry 
 		for ( size_t i = 0; i < nVertsHeight; ++i ) 
 		for ( size_t j = 0; j < nVertsWidth; ++j )
@@ -92,13 +92,11 @@ void Terrain::render()
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getViewMatrix()));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		glBindVertexArray(vao);
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		}
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	} shaderDefault->end();
 	// glDrawArrays(GL_TRIANGLES, 0, vertices.size());
