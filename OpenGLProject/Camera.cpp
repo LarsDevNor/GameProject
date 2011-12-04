@@ -18,7 +18,7 @@ void printMatrix(const glm::mat4& mat)
 		mat[3][0], mat[3][1], mat[3][2], mat[3][3]);
 }
 
-Camera::Camera() : moveSpeed(10.0f)
+Camera::Camera()
 {
 	gm = GameManager::getInstance();
 	init();
@@ -31,7 +31,7 @@ Camera::~Camera()
 void Camera::init()
 {
 	vpDim = gm->getWindowDim();
-	rotateSpeed = 30.0f;
+	rotateSpeed = 5.0f;
 	moveSpeed = 10.0f;
 	fov = 60.0f;
 	near = 0.1f;
