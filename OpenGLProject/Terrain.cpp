@@ -35,13 +35,14 @@ void Terrain::initGeometry()
 		for ( size_t i = 0; i < nVertsHeight-1; ++i )
 		for ( size_t j = 0; j < nVertsWidth-1; ++j )
 		{
-			indices.push_back(j		+ i*nVertsWidth);
-			indices.push_back((j+1) + i*nVertsWidth);
 			indices.push_back((j+1)	+ (i+1)*nVertsWidth);
-
+			indices.push_back((j+1) + i*nVertsWidth);
 			indices.push_back(j		+ i*nVertsWidth);
-			indices.push_back((j+1) + (i+1)*nVertsWidth);
+
 			indices.push_back((j)	+ (i+1)*nVertsWidth);
+			indices.push_back((j+1) + (i+1)*nVertsWidth);
+			indices.push_back(j		+ i*nVertsWidth);
+			
 		}
 	}
 	{ // bind geometry to buffers 
