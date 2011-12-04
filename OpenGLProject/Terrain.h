@@ -43,8 +43,10 @@ private:
 	size_t nVertsWidth;
 	size_t nVertsHeight;
 	GLuint vbo;
+	GLuint ibo;
 	GLuint vao;
 	std::vector<PTVertex> vertices;
+	std::vector<unsigned int> indices;
 	Shader* shaderDefault;
 
 private:
