@@ -27,6 +27,7 @@ Camera::Camera() : moveSpeed(0.25f), zoomSpeed(0.0275f)
 
 Camera::~Camera()
 {
+	
 }
 
 void Camera::init()

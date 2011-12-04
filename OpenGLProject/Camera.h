@@ -41,7 +41,7 @@ private:
 	glm::vec3 eye;
 	glm::vec3 target;
 	glm::vec3 up;
-
+	
 	float moveSpeed;
 	float rotateSpeed;
 	float dRot;
@@ -52,7 +52,6 @@ private:
 	float far;
 
 	glm::ivec2 vpDim;
-
 
 private:
 	GameManager* gm;

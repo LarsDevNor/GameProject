@@ -17,8 +17,8 @@ namespace semantic
 		enum type
 		{
 			POSITION = 0,
-			COLOR	 = 5,
-			TEXCOORD = 6
+			COLOR	 = 3,
+			TEXCOORD = 4
 		};
 	};
 };
@@ -43,7 +43,9 @@ private:
 	size_t nVertsHeight;
 	GLuint vbo;
 	GLuint vao;
+	GLuint ibo;
 	std::vector<PTVertex> vertices;
+	std::vector<unsigned int> indices;
 	Shader* shaderDefault;
 
 private:

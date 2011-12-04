@@ -42,12 +42,14 @@ void InputManager::handleMouse(float dt)
 	//{
 	//	sm->getCam()->zoom(deltaWheel);
 	//}
-
+	
 	//prevMouseWheel = mouseWheelNow;
 }
 
 void InputManager::handleKeyboard(float dt)
 {
+
+	
 	/* cam movement */
 	//if (glfwGetKey(GLFW_KEY_ESC))
 	//{
