@@ -10,17 +10,17 @@ Terrain::Terrain()
 {
 	gm = GameManager::getInstance();
 
-	initGeometry();
 	initShader();
+	initGeometry();
 }
 
 void Terrain::initGeometry()
 {
-	nVertsHeight = 512;
-	nVertsWidth = 512;
-	width = 200.0f;
-	height = 200.0f;
-	pn = new PerlinNoise(0.5, 0.1, 5000/(nVertsHeight+nVertsWidth), 8, 5);
+	nVertsHeight = 256;
+	nVertsWidth = 256;
+	width = 128.0f;
+	height = 128.0f;
+	pn = new PerlinNoise(0.5, 0.1, 2000/(nVertsHeight+nVertsWidth), 8, 5);
 
 	glm::vec2 spacing((float)width / nVertsWidth, (float)height / nVertsHeight);
 	{ // create geometry 
@@ -55,7 +55,7 @@ void Terrain::initGeometry()
 			normals[j+i*nVertsWidth] = glm::normalize(normalsAcc / 8.0f);
 		}
 
-		const size_t smoothingIterations = 5;
+		const size_t smoothingIterations = 1;
 		for ( size_t iteration = 0; iteration < smoothingIterations; ++iteration)
 		for ( size_t i = 1; i < nVertsHeight-1; ++i )
 		for ( size_t j = 1; j < nVertsWidth-1; ++j )
@@ -150,10 +150,11 @@ void Terrain::render()
 	{
 		int viewLoc = shaderDefault->getUniLoc("view");
 		int projLoc = shaderDefault->getUniLoc("proj");
-		int modelLoc = shaderDefault->getUniLoc("model");
+		//int modelLoc = shaderDefault->getUniLoc("model");
+		int camPosLoc = shaderDefault->getUniLoc("camPos");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getViewMatrix()));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
-
+		glUniform3fv(camPosLoc, 1, glm::value_ptr(-gm->getActiveCamera()->getEye()));
 		glBindVertexArray(vao);
 		{
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);

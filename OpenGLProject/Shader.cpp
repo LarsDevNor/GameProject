@@ -146,7 +146,7 @@ int Shader::getUniLoc(char* name)
 {
 	glUseProgram(program);
 	int pos = glGetUniformLocation(program, name);
-	/*if ( pos == -1 )
-		printf("uniform: %s not found\n", name);*/
+	//if ( pos == -1 )
+	//	printf("uniform: %s not found\n", name);
 	return pos;
 }

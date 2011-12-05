@@ -16,11 +16,17 @@ layout(location = TEXCOORD) in vec2 texCoord;
 
 out vec2 fTexCoord;
 out vec3 fNormal;
+out vec3 fPos;
+flat out vec3 fFlatPos;
 
 void main()
 {
+	mat4 mvp = proj * view; //model;
+	vec4 posMVP = mvp * vec4(pos);
+	gl_Position = posMVP;
+	
+	fPos = pos.xyz;
+	fFlatPos = pos.xyz;
 	fNormal = normal;
 	fTexCoord = texCoord;
-	mat4 mvp = proj * view; //model;
-	gl_Position = mvp * vec4(pos);
 }
