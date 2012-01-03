@@ -13,13 +13,12 @@ class GameManager
 {
 public:
 	static GameManager* getInstance();
+public:
 	void init(const glm::ivec2& _windowDim);
 	virtual ~GameManager();
-
 	void Tick(float dt);
-	void toggleFlushError() { flushError = !flushError; printf("Flusing GLError: %i\n", flushError); }
+	void toggleFlushError() { flushError = !flushError; (flushError) ? printf("Flusing GLError") : printf("Stopped Flusing GLError"); }
 	void toggleVSync() { vSync = !vSync; vSync ? glfwSwapInterval(1) : glfwSwapInterval(0); }
-
 public:
 	void setRunning(bool _running) { running = _running; }
 	bool getRunning() const { return running; }
@@ -29,20 +28,16 @@ public:
 
 private:
 	static GameManager* instance;
+private:
 	GameManager();
-
 	void update(float dt);
 	void render();
-	void flushGLError();
-
 	bool flushError;
 	bool vSync;
 	bool running;
-
 	Camera* cameraDefault;
 	Terrain* terrain;
 	InputManager* inputManager;
-
 	glm::ivec2 windowDim;
 };
 

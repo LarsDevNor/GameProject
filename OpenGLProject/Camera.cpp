@@ -34,8 +34,8 @@ void Camera::init()
 	rotateSpeed = 5.0f;
 	moveSpeed = 10.0f;
 	fov = 60.0f;
-	near = 0.1f;
-	far = 1000.0f;
+	near = 1.0f;
+	far = 100.0f;
 	glViewport(0, 0, vpDim.x, vpDim.y);
 	setProjection();
 

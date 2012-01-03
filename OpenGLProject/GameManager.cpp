@@ -40,7 +40,7 @@ GameManager::~GameManager()
 void GameManager::Tick(float dt)
 {
 	if(flushError)
-		flushGLError();
+		::flushGLError("GameManager::Tick()");
 	update(dt);
 	render();
 }
@@ -55,31 +55,5 @@ void GameManager::render()
 	terrain->render();
 }	
 
-void GameManager::flushGLError()
-{
-	GLenum error = glGetError();
-	if ( error != GL_NO_ERROR )
-	{
-		while ( true )
-		{
-			if ( error == GL_INVALID_ENUM )
-				printf("Invalid enum\n");
-			else if ( error == GL_INVALID_VALUE )
-				printf("Invalid value\n");
-			else if ( error == GL_INVALID_OPERATION )
-				printf("Invalid operation\n");
-			else if ( error == GL_STACK_OVERFLOW )
-				printf("Stack overflow\n");
-			else if ( error == GL_STACK_UNDERFLOW )
-				printf("Stack underflow\n");
-			else if ( error == GL_OUT_OF_MEMORY )
-				printf("Out of memory\n");
-			//else if ( error == GL_TABLE_TOO_LARGE )
-			//	printf("Table too large\n");
-			error = glGetError();
-			if ( error == GL_NO_ERROR )
-				break;
-		}
-	}
-}
+
 

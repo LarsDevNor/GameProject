@@ -1,9 +1,9 @@
 #version 400 core
 
 #define POSITION	0
-#define NORMAL		3
-#define COLOR		6
-#define TEXCOORD	7
+#define NORMAL		1
+#define COLOR		2
+#define TEXCOORD	3
 #define FRAG_COLOR	0
 
 uniform vec3 camPos;
@@ -19,8 +19,6 @@ flat in vec3 fFlatPos;
 
 void main()
 {
-	color = vec4(fTexCoord.xy, fNormal.z, 1.0);
-
 	vec3 lightDir = vec3(0.0, -1.0, 0.0);
 	float lDotN = dot(lightDir, normalize(fNormal));
 	color = vec4(vec3(lDotN, lDotN, 0.3)*0.4, 1.0);
@@ -35,11 +33,14 @@ void main()
 	
 	const float maxDist = 10.0f;
 	float distToCam = length(camPos.xz - fPos.xz);
-	distToCam =clamp(distToCam, 0.0, maxDist);
+	distToCam = clamp(distToCam, 0.0, maxDist);
 
 	color.rg += (maxDist-distToCam)*(1.0/maxDist) * (closeness0.x + closeness1.x)*2.0;
 	color.rg += (maxDist-distToCam)*(1.0/maxDist) * (closeness0.y + closeness1.y)*2.0;
 
 //	color = vec4(fFlatPos, 1.0);
+
+	color = vec4(vec3(lDotN), 1.0);
+	//color = vec4(0.5+0.5*fNormal, 1.0);
 
 }

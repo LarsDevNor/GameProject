@@ -18,4 +18,6 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "Common.hpp"
+
 // TODO: reference additional headers your program requires here: glm, glew, opengl, etc 

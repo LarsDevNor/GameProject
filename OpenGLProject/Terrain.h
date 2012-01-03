@@ -1,30 +1,5 @@
 #pragma once 
 
-// TODO: extract to common header 
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
-struct PNTVertex
-{
-	PNTVertex( glm::vec3 const & position, glm::vec3 normal, glm::vec2 const & texcoord ) :
-		position(position), normal(normal), texcoord(texcoord) {}
-
-	glm::vec3 position;
-	glm::vec3 normal;
-	glm::vec2 texcoord;
-};
-namespace semantic 
-{
-	namespace attr
-	{
-		enum type
-		{
-			POSITION = 0,
-			NORMAL = 3,
-			COLOR	 = 6,
-			TEXCOORD = 7
-		};
-	};
-};
-
 class Shader;
 class GameManager;
 class PerlinNoise;
@@ -37,7 +12,13 @@ public:
 public:
 	void initGeometry();
 	void initShader();
+	void initFBO();
+	void initTextures();
+	void initSamplers();
+
 	void render();
+	void renderTerrain();
+	void renderFullscreenQuad();
 
 private:
 	void calcNormals();
@@ -50,14 +31,22 @@ private:
 	GLuint vbo;
 	GLuint ibo;
 	GLuint vao;
+	GLuint fbo; 
+	GLuint colorTex;
+	GLuint depthTex;
+	GLuint defaultSampler; // linear, clamp 
 	std::vector<glm::vec3> normals;
 	std::vector<float> heights;
 	std::vector<PNTVertex> vertices;
 	std::vector<unsigned int> indices;
 	Shader* shaderDefault;
+	Shader* shaderPostproc;
+	
+	GLuint quadBuffer;
+	GLuint quadVAO;
+	std::vector<glm::vec2> quadVertices;
 
 private:
 	GameManager* gm;
-
 	PerlinNoise* pn;
 };

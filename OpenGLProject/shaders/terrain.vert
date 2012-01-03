@@ -1,9 +1,9 @@
 #version 400 core
 
 #define POSITION	0
-#define NORMAL		3
-#define COLOR		6
-#define TEXCOORD	7
+#define NORMAL		1
+#define COLOR		2
+#define TEXCOORD	3
 #define FRAG_COLOR	0
 
 uniform mat4 model;
