@@ -6,18 +6,7 @@
 #include "Shader.h"
 #include "Terrain.h"
 
-/*
-	ITEMS:
 
-	1. SSAO: 
-	2. generate terrain as we move 
-	3. Clamp player to terrain in shader
-	4. weapons
-	5. Destructible terrain
-	6. deferred renderer
-
-
-*/
 
 Terrain::Terrain() 
 {
@@ -25,9 +14,9 @@ Terrain::Terrain()
 
 	initShader();
 	initGeometry();
-	initTextures();
-	initSamplers();
-	initFBO();
+	//initTextures();
+	//initSamplers();
+	//initFBO();
 }
 
 void Terrain::initGeometry()
@@ -162,29 +151,6 @@ void Terrain::initGeometry()
 		} glBindVertexArray(0);
 	} 
 
-	{ // quad fullscreen geometry 
-		glGenVertexArrays(1, &quadVAO);
-		quadVertices.push_back(glm::vec2(-1.0f, -1.0f));
-		quadVertices.push_back(glm::vec2(1.0f, -1.0f));
-		quadVertices.push_back(glm::vec2(1.0f, 1.0f));
-		quadVertices.push_back(glm::vec2(-1.0f, 1.0f));
-		
-		glGenBuffers(1, &quadBuffer);
-		glBindBuffer(GL_ARRAY_BUFFER, quadBuffer);
-		{
-			glBufferData(GL_ARRAY_BUFFER, quadVertices.size() * sizeof(glm::vec2), &quadVertices[0], GL_STATIC_DRAW);
-		}
-
-		glBindVertexArray(quadVAO);
-		{
-			glBindBuffer(GL_ARRAY_BUFFER, quadBuffer);
-			{
-				glVertexAttribPointer(semantic::attr::POSITION, 2, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(0));
-			}
-			glEnableVertexAttribArray(semantic::attr::POSITION);
-		}
-	}
-
 	::flushGLError("Terrain::initGeometry()");
 }
 
@@ -194,76 +160,6 @@ void Terrain::initShader()
 	shaderDefault->addStage("./shaders/terrain.vert", "", GL_VERTEX_SHADER);
 	shaderDefault->addStage("./shaders/terrain.frag", "", GL_FRAGMENT_SHADER);
 	shaderDefault->install();
-
-	shaderPostproc = new Shader();
-	shaderPostproc->addStage("./shaders/postproc.vert", "", GL_VERTEX_SHADER);
-	shaderPostproc->addStage("./shaders/postproc.frag", "", GL_FRAGMENT_SHADER);
-	shaderPostproc->install();
-
-	::flushGLError("Terrain::initShader()");
-}
-
-void Terrain::initTextures()
-{
-	glActiveTexture(GL_TEXTURE0);
-	glGenTextures(1, &colorTex);
-	glGenTextures(1, &depthTex);
-
-	{ // color rtt target
-		glBindTexture(GL_TEXTURE_2D, colorTex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, gm->getWindowDim().x, gm->getWindowDim().y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	}
-	{ // depth rtt target 
-		glBindTexture(GL_TEXTURE_2D, depthTex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, gm->getWindowDim().x, gm->getWindowDim().y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	}
-
-	::flushGLError("Terrain::initTextures()");
-}
-
-void Terrain::initSamplers()
-{
-	glGenSamplers(1, &defaultSampler);
-	glSamplerParameteri(defaultSampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glSamplerParameteri(defaultSampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glSamplerParameteri(defaultSampler, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glSamplerParameteri(defaultSampler, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	::flushGLError("Terrain::initSamplers()");
-}
-
-
-void Terrain::initFBO()
-{
-	glGenFramebuffers(1, &fbo);
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-	glBindTexture(GL_TEXTURE_2D, colorTex);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, colorTex, 0);
-	glBindTexture(GL_TEXTURE_2D, depthTex);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTex, 0);
-
-	//GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0 };
-	//glDrawBuffers(2, drawBuffers);
-	
-	if(::checkFramebuffer(GL_FRAMEBUFFER, "Terrain::initFBO()"))
-	{
-		// throw or sth 
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	::flushGLError("Terrain::initFBO()");
 }
 
 void Terrain::renderTerrain()
@@ -272,7 +168,7 @@ void Terrain::renderTerrain()
 	{
 		int viewLoc = shaderDefault->getUniLoc("view");
 		int projLoc = shaderDefault->getUniLoc("proj");
-		//int modelLoc = shaderDefault->getUniLoc("model");
+		//int modelLoc = shaderDefault->getUniLoc("model"); 
 		//int camPosLoc = shaderDefault->getUniLoc("camPos");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getViewMatrix()));
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
@@ -287,47 +183,21 @@ void Terrain::renderTerrain()
 	::flushGLError("Terrain::renderTerrain()");
 }
 
-void Terrain::renderFullscreenQuad()
-{
-	glDisable(GL_DEPTH_TEST);
-
-	shaderPostproc->begin();
-	{
-		{
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, depthTex);
-			glUniform1i(shaderPostproc->getUniLoc("depthSampler"), 0);
-		}
-		{
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, colorTex);
-			glUniform1i(shaderPostproc->getUniLoc("colorSampler"), 1);
-		}
-		/*glBindSampler(0, defaultSampler);*/
-
-		glBindVertexArray(quadVAO);
-		{
-			glDrawArrays(GL_QUADS, 0, 4);
-		} glBindVertexArray(0);
-	} shaderPostproc->end();
-
-	::flushGLError("Terrain::renderFullscreenQuad()");
-}
-
-void Terrain::render()
+void Terrain::render(GLuint fbo)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	{
-		glEnable(GL_DEPTH_TEST);
-		const float depthClear = 1.0;
-		glClearBufferfv(GL_COLOR, 0, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, drawBuffers);
 
+		glClearBufferfv(GL_COLOR, 0, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+
+		const float depthClear = 1.0;
 		glClearBufferfv(GL_DEPTH, 0, &depthClear);
 
 		renderTerrain();
 	} glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	renderFullscreenQuad();
 
 	::flushGLError("Terrain::render()");
 }

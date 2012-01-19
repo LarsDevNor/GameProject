@@ -5,12 +5,14 @@
 #define COLOR		2
 #define TEXCOORD	3
 #define FRAG_COLOR	0
+#define FRAG_COLOR_AD0 1
 
 uniform vec3 camPos;
 
 const float spacing = 1.0f;
 
 layout(location = FRAG_COLOR) out vec4 color;
+layout(location = FRAG_COLOR_AD0) out vec4 color_ad0;
 
 in vec2 fTexCoord;
 in vec3 fNormal;
@@ -41,6 +43,7 @@ void main()
 //	color = vec4(fFlatPos, 1.0);
 
 	color = vec4(vec3(lDotN), 1.0);
+	color_ad0 = vec4(fNormal, 1.0);
 	//color = vec4(0.5+0.5*fNormal, 1.0);
 
 }

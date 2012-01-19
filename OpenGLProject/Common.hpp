@@ -1,5 +1,22 @@
 #pragma once 
 
+/*
+	ITEMS:
+
+	- diff types of postprocessing filters - takes input and output textures needed for filter *** 100% 
+	- ShaderManager - installs shaders, associates string names with shaders *** 0%
+	- FrameBufferObject-, Texture-, other_GL_type- Wrappers - unngår handles, kan legge mye brukt setup kode her etc *** 0%
+	- Terrain editing - Drag up/down, apply diff textures etc *** 0%
+	- Clamp player to terrain in shader *** 0%
+	- generate terrain as we move *** 0%
+	- weapons *** 0%
+	- Destructible terrain *** 0%
+	- Particle system *** 0% 
+	- SSAO *** 0%
+	- deferred renderer *** 0%
+	- OpenCL processing (use for particle system maybe) *** 0%
+*/
+
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
 struct PNTVertex

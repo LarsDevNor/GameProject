@@ -5,6 +5,7 @@
 #define COLOR		2
 #define TEXCOORD	3
 #define FRAG_COLOR	0
+#define FRAG_COLOR_AD0 1
 
 uniform mat4 model;
 uniform mat4 view;
@@ -27,6 +28,6 @@ void main()
 	
 	fPos = pos.xyz;
 	fFlatPos = pos.xyz;
-	fNormal = normal;
+	fNormal = (view * vec4(normal, 0.0)).xyz;
 	fTexCoord = texCoord;
 }

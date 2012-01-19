@@ -8,6 +8,7 @@
 class Camera;
 class Terrain;
 class InputManager;
+class PostProcessFog;
 
 class GameManager
 {
@@ -32,6 +33,7 @@ private:
 	GameManager();
 	void update(float dt);
 	void render();
+	void initMainFBO(); 
 	bool flushError;
 	bool vSync;
 	bool running;
@@ -39,5 +41,12 @@ private:
 	Terrain* terrain;
 	InputManager* inputManager;
 	glm::ivec2 windowDim;
+
+	GLuint sceneColorTex;
+	GLuint sceneDepthTex;
+	GLuint sceneNormalTex;
+	GLuint sceneFBO;
+
+	PostProcessFog* ppFog;
 };
 

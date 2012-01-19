@@ -36,6 +36,18 @@
     <ClInclude Include="Terrain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PerlinNoise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PostProcess.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -59,12 +71,33 @@
     <ClCompile Include="Terrain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PerlinNoise.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PostProcess.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\terrain.frag">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\terrain.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\postproc.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\postproc.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\fog.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\fog.frag">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

@@ -12,13 +12,13 @@ public:
 public:
 	void initGeometry();
 	void initShader();
-	void initFBO();
-	void initTextures();
-	void initSamplers();
+	//void initFBO();
+	//void initTextures();
+	//void initSamplers();
 
-	void render();
+	void render(GLuint sceneFBO);
 	void renderTerrain();
-	void renderFullscreenQuad();
+	//void renderFullscreenQuad();
 
 private:
 	void calcNormals();
@@ -31,8 +31,9 @@ private:
 	GLuint vbo;
 	GLuint ibo;
 	GLuint vao;
-	GLuint fbo; 
+	/*GLuint fbo; */
 	GLuint colorTex;
+	GLuint normalTex;
 	GLuint depthTex;
 	GLuint defaultSampler; // linear, clamp 
 	std::vector<glm::vec3> normals;
