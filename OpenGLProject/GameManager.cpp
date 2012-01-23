@@ -33,6 +33,7 @@ void GameManager::init(const glm::ivec2& _windowDim)
 	inputManager = new InputManager();
 	initMainFBO();
 	ppFog = new PostProcessFog();
+	ppSSAO = new PostProcessSSAO();
 }
 
 GameManager::~GameManager()
@@ -56,7 +57,9 @@ void GameManager::update(float dt)
 void GameManager::render()
 {
 	terrain->render(sceneFBO);
-	ppFog->run(sceneColorTex, sceneDepthTex);
+
+	ppSSAO->run(sceneColorTex, sceneNormalTex, scenePositionTex, sceneDepthTex);
+	//ppFog->run(sceneColorTex, sceneDepthTex);
 }	
 
 void GameManager::initMainFBO()
@@ -68,10 +71,10 @@ void GameManager::initMainFBO()
 
 	{ // color rtt target
 		glBindTexture(GL_TEXTURE_2D, sceneColorTex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, windowDim.x, windowDim.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 	}
 	{ // normal rtt target 
@@ -80,7 +83,15 @@ void GameManager::initMainFBO()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, windowDim.x, windowDim.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, windowDim.x, windowDim.y, 0, GL_RGBA, GL_FLOAT, 0);
+	}
+	{ // position rtt target 
+		glBindTexture(GL_TEXTURE_2D, scenePositionTex);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, windowDim.x, windowDim.y, 0, GL_RGBA, GL_FLOAT, 0);
 	}
 	{ // depth rtt target 
 		glBindTexture(GL_TEXTURE_2D, sceneDepthTex);
@@ -102,6 +113,8 @@ void GameManager::initMainFBO()
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sceneColorTex, 0);
 	glBindTexture(GL_TEXTURE_2D, sceneNormalTex);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, sceneNormalTex, 0);
+	glBindTexture(GL_TEXTURE_2D, scenePositionTex);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, scenePositionTex, 0);
 	glBindTexture(GL_TEXTURE_2D, sceneDepthTex);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, sceneDepthTex, 0);
 

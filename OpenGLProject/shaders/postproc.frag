@@ -6,6 +6,7 @@
 #define TEXCOORD	3
 #define FRAG_COLOR	0
 #define FRAG_COLOR_AD0 1
+#define FRAG_COLOR_AD1 2
 
 //uniform sampler2D depthSampler;
 uniform sampler2D colorSampler;

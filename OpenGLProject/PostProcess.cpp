@@ -36,6 +36,8 @@ void PostProcess::resetGeometry()
 	::flushGLError("PostProcess::initGeometry()");
 }
 
+////////////////// FOG 
+
 PostProcessFog::PostProcessFog()
 {
 	initShaders();
@@ -91,6 +93,80 @@ void PostProcessFog::run(GLuint colorTexIn, GLuint depthTexIn, GLuint rgbaTexOut
 	} shader->end();
 
 	::flushGLError("PostProcessFog::run()");
+	
+	if (rgbaTexOut!=0) // detach rgba out if not rendering to screen 
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+}
+
+////////////////// SSAO 
+
+PostProcessSSAO::PostProcessSSAO()
+{
+	initShaders();
+	resetGeometry();
+	initFBO();
+}
+
+void PostProcessSSAO::initFBO()
+{
+	glGenFramebuffers(1, &fbo);
+	::flushGLError("Terrain::initFBO()");
+}
+
+void PostProcessSSAO::initShaders()
+{
+	shader = new Shader();
+	shader->addStage("./shaders/ssao.vert", "", GL_VERTEX_SHADER);
+	shader->addStage("./shaders/ssao.frag", "", GL_FRAGMENT_SHADER);
+	shader->install();
+
+	::flushGLError("PostProcessSSAO::initShader()");
+}
+
+void PostProcessSSAO::run(GLuint colorTexIn, GLuint normalTexIn, GLuint posTexIn, GLuint depthTexIn, GLuint rgbaTexOut)
+{
+	if(rgbaTexOut!=0) // attach rgba out if not rendering to screen 
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glBindTexture(GL_TEXTURE_2D, rgbaTexOut); // output to client color texture
+		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rgbaTexOut, 0);
+		if(!::checkFramebuffer(GL_FRAMEBUFFER, "Terrain::initFBO()"))
+		{
+			// throw or sth 
+		}
+	}
+	// render to framebuffer with rgbaTexOut attached.. or something along those lines
+	shader->begin();
+	{
+		{ 
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, colorTexIn);
+			glUniform1i(shader->getUniLoc("colorSampler"), 0);
+		}
+		{ 
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, normalTexIn);
+			glUniform1i(shader->getUniLoc("colorSampler"), 1);
+		}
+		{ 
+			glActiveTexture(GL_TEXTURE2);
+			glBindTexture(GL_TEXTURE_2D, posTexIn);
+			glUniform1i(shader->getUniLoc("colorSampler"), 2);
+		}
+		{ 
+			glActiveTexture(GL_TEXTURE3);
+			glBindTexture(GL_TEXTURE_2D, depthTexIn);
+			glUniform1i(shader->getUniLoc("depthSampler"), 3);
+		}
+		glBindVertexArray(quadVAO);
+		{
+			glDrawArrays(GL_QUADS, 0, 4);
+		} glBindVertexArray(0);
+	} shader->end();
+
+	::flushGLError("PostProcessSSAO::run()");
 	
 	if (rgbaTexOut!=0) // detach rgba out if not rendering to screen 
 	{

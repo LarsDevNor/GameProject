@@ -187,13 +187,14 @@ void Terrain::render(GLuint fbo)
 {
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 	{
-		GLenum drawBuffers[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-		glDrawBuffers(2, drawBuffers);
+		GLenum drawBuffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+		glDrawBuffers(3, drawBuffers);
 
 		glClearBufferfv(GL_COLOR, 0, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 		glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
+		glClearBufferfv(GL_COLOR, 2, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
 
-		const float depthClear = 1.0;
+		const float depthClear = 1.0; // clear to max depth 
 		glClearBufferfv(GL_DEPTH, 0, &depthClear);
 
 		renderTerrain();

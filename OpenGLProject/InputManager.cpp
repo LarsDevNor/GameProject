@@ -12,7 +12,7 @@ InputManager::InputManager()
 {
 	prevMouseWheel = glfwGetMouseWheel();
 	gm = GameManager::getInstance();
-	glfwDisable(GLFW_MOUSE_CURSOR);
+	leftMouseButtonJustClicked = false;
 }
 
 InputManager::~InputManager()
@@ -33,18 +33,30 @@ void InputManager::update(float dt)
 
 void InputManager::handleMouse(float dt)
 {
-	glm::ivec2 centerPos;
-	glfwGetWindowSize(&centerPos.x,&centerPos.y);
-	centerPos /= 2;
-	
-	glm::ivec2 deltaPos;
-	glfwGetMousePos(&deltaPos.x,&deltaPos.y);
+	// first person controls when holding left mouse button 
+	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT) && leftMouseButtonJustClicked)
+	{
+		glm::ivec2 currentPos;
+		glfwGetMousePos(&currentPos.x,&currentPos.y);
 
-	deltaPos -= centerPos;
+		glm::ivec2 deltaPos = currentPos - anchorPos;
 
-	glfwSetMousePos(centerPos.x, centerPos.y);
-	gm->getActiveCamera()->rotateY(dt*(float)deltaPos.x);
-	gm->getActiveCamera()->rotateX(dt*(float)deltaPos.y);
+		glfwSetMousePos(anchorPos.x, anchorPos.y);
+		gm->getActiveCamera()->rotateY(dt*(float)deltaPos.x);
+		gm->getActiveCamera()->rotateX(dt*(float)deltaPos.y);
+		glfwDisable(GLFW_MOUSE_CURSOR);
+	}
+	else if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
+	{
+		glfwGetMousePos(&anchorPos.x, &anchorPos.y);
+		leftMouseButtonJustClicked = true;
+	}
+	else
+	{
+		leftMouseButtonJustClicked = false;
+		glfwEnable(GLFW_MOUSE_CURSOR); 
+	}
+		
 }
 
 void InputManager::handleKeyboard(float dt)
@@ -57,7 +69,7 @@ void InputManager::handleKeyboard(float dt)
 	{
 		gm->getActiveCamera()->moveForward(-dt);
 	}
-
+	
 	if(glfwGetKey('A'))
 	{
 		gm->getActiveCamera()->moveLeft(dt);

@@ -15,6 +15,7 @@
 	- SSAO *** 0%
 	- deferred renderer *** 0%
 	- OpenCL processing (use for particle system maybe) *** 0%
+	- Add shader variable position defines from c++ before compile *** 0%
 */
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
