@@ -14,23 +14,16 @@ uniform mat4 view;
 uniform mat4 proj;
 
 layout(location = POSITION) in vec4 pos;
-layout(location = NORMAL)	in vec3 normal;
-layout(location = TEXCOORD) in vec2 texCoord;
+layout(location = TEXCOORD) in vec2 texcoord;
 
-out vec2 fTexCoord;
-out vec3 fNormal;
+out vec2 fTexcoord;
 out vec3 fPos;
-//flat out vec3 fFlatPos;
 
 void main()
 {
-	mat4 mvp = proj * view; //model;
+	mat4 mvp = proj * view;// * model;
 	vec4 posMVP = mvp * vec4(pos);
 	gl_Position = posMVP;
 	
-	//fPos = posMVP.xyz;
-	fPos = (view * pos).xyz;
-	//fFlatPos = pos.xyz;
-	fNormal = (view * vec4(normal, 0.0)).xyz;
-	fTexCoord = texCoord;
+	fTexcoord = texcoord;
 }

@@ -12,7 +12,8 @@ InputManager::InputManager()
 {
 	prevMouseWheel = glfwGetMouseWheel();
 	gm = GameManager::getInstance();
-	leftMouseButtonJustClicked = false;
+	leftMouseButtonHeld 	= false;
+	rightMouseButtonJustClicked = false;
 }
 
 InputManager::~InputManager()
@@ -34,7 +35,18 @@ void InputManager::update(float dt)
 void InputManager::handleMouse(float dt)
 {
 	// first person controls when holding left mouse button 
-	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT) && leftMouseButtonJustClicked)
+
+	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT))
+		leftMouseButtonHeld = true;
+	else if ( leftMouseButtonHeld )
+	{
+		glm::ivec2 currentPos;
+		glfwGetMousePos(&currentPos.x, &currentPos.y);
+		gm->pick(currentPos);
+		leftMouseButtonHeld = false;
+	}
+
+	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT) && rightMouseButtonJustClicked)
 	{
 		glm::ivec2 currentPos;
 		glfwGetMousePos(&currentPos.x,&currentPos.y);
@@ -49,11 +61,11 @@ void InputManager::handleMouse(float dt)
 	else if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
 	{
 		glfwGetMousePos(&anchorPos.x, &anchorPos.y);
-		leftMouseButtonJustClicked = true;
+		rightMouseButtonJustClicked = true;
 	}
 	else
 	{
-		leftMouseButtonJustClicked = false;
+		rightMouseButtonJustClicked = false;
 		glfwEnable(GLFW_MOUSE_CURSOR); 
 	}
 		

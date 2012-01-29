@@ -7,6 +7,8 @@
 #define FRAG_COLOR	0
 #define FRAG_COLOR_AD0 1
 #define FRAG_COLOR_AD1 2
+#define FRAG_COLOR_AD2 2
+#define FRAG_COLOR_AD2 3
 
 uniform sampler2D colorSampler;
 uniform sampler2D depthSampler;

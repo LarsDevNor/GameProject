@@ -9,12 +9,11 @@
 #define FRAG_COLOR_AD1 2
 #define FRAG_COLOR_AD2 3
 
-layout(location = POSITION) in vec2 pos;
+layout(location = FRAG_COLOR) out vec4 color;
 
-out vec2 fTexcoord;
+in vec2 fTexcoord;
 
 void main()
 {
-	fTexcoord = vec2(0.5, 0.5) + 0.5 * pos.xy;
-	gl_Position = vec4(pos.xy, 0.0, 1.0);
+	color = vec4(fTexcoord.x, fTexcoord.y, 0.0, 1.0);
 }

@@ -14,9 +14,29 @@ Terrain::Terrain()
 
 	initShader();
 	initGeometry();
+	initPickingFBO();
 	//initTextures();
 	//initSamplers();
 	//initFBO();
+}
+
+void Terrain::initPickingFBO()
+{
+	// create, bind, and establish storage for renderbuffer 
+	glGenRenderbuffers(1, &pickingRB);
+	glBindRenderbuffer(GL_RENDERBUFFER, pickingRB);
+	glm::ivec2 windowDim = gm->getWindowDim();
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, windowDim.x, windowDim.y);
+	// create and bind FBO, attach renderbuffer to it 
+	glGenFramebuffers(1, &pickingFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, pickingFBO);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, pickingRB);
+
+	::checkFramebuffer(GL_FRAMEBUFFER, "Terrain::initPickingFBO()");
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	::flushGLError("Terrain::initPickingFBO()");	
 }
 
 void Terrain::initGeometry()
@@ -156,49 +176,73 @@ void Terrain::initGeometry()
 
 void Terrain::initShader()
 {
-	shaderDefault = new Shader();
-	shaderDefault->addStage("./shaders/terrain.vert", "", GL_VERTEX_SHADER);
-	shaderDefault->addStage("./shaders/terrain.frag", "", GL_FRAGMENT_SHADER);
-	shaderDefault->install();
+	defaultShader = new Shader();
+	defaultShader->addStage("./shaders/terrain.vert", "", GL_VERTEX_SHADER);
+	defaultShader->addStage("./shaders/terrain.frag", "", GL_FRAGMENT_SHADER);
+	defaultShader->install();
+
+	pickingShader = new Shader();
+	pickingShader->addStage("./shaders/pickingTerrain.vert", "", GL_VERTEX_SHADER);
+	pickingShader->addStage("./shaders/pickingTerrain.frag", "", GL_FRAGMENT_SHADER);
+	pickingShader->install();
 }
 
-void Terrain::renderTerrain()
+void Terrain::renderTerrain(Shader* renderShader)
 {
-	shaderDefault->begin();
+	int viewLoc = renderShader->getUniLoc("view");
+	int projLoc = renderShader->getUniLoc("proj");
+	//int modelLoc = defaultShader->getUniLoc("model"); 
+	//int camPosLoc = defaultShader->getUniLoc("camPos");
+	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getViewMatrix()));
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
+	//glUniform3fv(camPosLoc, 1, glm::value_ptr(-gm->getActiveCamera()->getEye()));
+
+	glBindVertexArray(vao);
 	{
-		int viewLoc = shaderDefault->getUniLoc("view");
-		int projLoc = shaderDefault->getUniLoc("proj");
-		//int modelLoc = shaderDefault->getUniLoc("model"); 
-		//int camPosLoc = shaderDefault->getUniLoc("camPos");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getViewMatrix()));
-		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
-		//glUniform3fv(camPosLoc, 1, glm::value_ptr(-gm->getActiveCamera()->getEye()));
-		glBindVertexArray(vao);
-		{
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-		} glBindVertexArray(0);
-	} shaderDefault->end();
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	} glBindVertexArray(0);
 
 	::flushGLError("Terrain::renderTerrain()");
 }
 
+void Terrain::pick(const glm::ivec2& screenCoord)
+{
+	glBindFramebuffer(GL_FRAMEBUFFER, pickingFBO);
+	pickingShader->begin();
+	renderTerrain(pickingShader);
+	pickingShader->end();
+	float pixelValue[4];
+	glReadPixels( screenCoord.x, screenCoord.y, 1, 1, GL_RGBA, GL_FLOAT, &pixelValue);
+	std::printf("pixel: %g %g %g %g\n", pixelValue[0], pixelValue[1], pixelValue[2], pixelValue[3]);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	::flushGLError("Terrain::pick()");
+}
+
+// TODO: use a diff shader when no render to FBO s
 void Terrain::render(GLuint fbo)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	if( fbo != 0 )
 	{
-		GLenum drawBuffers[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-		glDrawBuffers(3, drawBuffers);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		GLenum drawBuffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };
+		glDrawBuffers(4, drawBuffers);
 
 		glClearBufferfv(GL_COLOR, 0, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 		glClearBufferfv(GL_COLOR, 1, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 1.0f)));
 		glClearBufferfv(GL_COLOR, 2, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
+		glClearBufferfv(GL_COLOR, 3, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
 
 		const float depthClear = 1.0; // clear to max depth 
 		glClearBufferfv(GL_DEPTH, 0, &depthClear);
+	}
 
-		renderTerrain();
-	} glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	renderTerrain(pickingShader);
+
+	if ( fbo != 0)
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	::flushGLError("Terrain::render()");
 }
