@@ -9,6 +9,7 @@ class Camera;
 class Terrain;
 class InputManager;
 class PostProcessFog;
+class PostProcessSSAO;
 
 class GameManager
 {
@@ -20,10 +21,11 @@ public:
 	void Tick(float dt);
 	void toggleFlushError() { flushError = !flushError; (flushError) ? printf("Flusing GLError") : printf("Stopped Flusing GLError"); }
 	void toggleVSync() { vSync = !vSync; vSync ? glfwSwapInterval(1) : glfwSwapInterval(0); }
+	void pick(const glm::ivec2& screenCoord);
 public:
-	void setRunning(bool _running) { running = _running; }
-	bool getRunning() const { return running; }
-	Camera* getActiveCamera() { return cameraDefault; }
+	void setRunning(bool _running) 	{ running = _running; }
+	bool getRunning() const 		{ return running; }
+	Camera* getActiveCamera() 		{ return cameraDefault; }
 	void setWindowDim(const glm::ivec2& _windowDim) { windowDim = _windowDim; }
 	glm::ivec2 getWindowDim () const { return windowDim; }
 
@@ -45,8 +47,11 @@ private:
 	GLuint sceneColorTex;
 	GLuint sceneDepthTex;
 	GLuint sceneNormalTex;
+	GLuint scenePositionTex;
+	GLuint scenePickingTex;
 	GLuint sceneFBO;
 
 	PostProcessFog* ppFog;
+	PostProcessSSAO* ppSSAO;
 };
 

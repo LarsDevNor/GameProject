@@ -12,7 +12,11 @@ public:
 private:
  	void handleKeyboard(float dt);
  	void handleMouse(float dt);
+ private:
  	std::vector<unsigned int> keys;
  	int prevMouseWheel;
     GameManager *gm;
+    bool leftMouseButtonHeld;
+    bool rightMouseButtonJustClicked;
+    glm::ivec2 anchorPos;
 };

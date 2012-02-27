@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "GameManager.h"
 #include "Shader.h"
 #include "PostProcess.h"
 
@@ -112,7 +113,7 @@ PostProcessSSAO::PostProcessSSAO()
 void PostProcessSSAO::initFBO()
 {
 	glGenFramebuffers(1, &fbo);
-	::flushGLError("Terrain::initFBO()");
+	::flushGLError("PostProcessSSAO::initFBO()");
 }
 
 void PostProcessSSAO::initShaders()
@@ -172,6 +173,69 @@ void PostProcessSSAO::run(GLuint colorTexIn, GLuint normalTexIn, GLuint posTexIn
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
+}
+
+PostProcessEdit::PostProcessEdit()
+{
+	resetGeometry();
+	initShaders();
+	initFBO();
+}
+
+//////////////////////////////// EDIT 
+
+void PostProcessEdit::initFBO()
+{
+	glGenFramebuffers(1, &fbo);
+	::flushGLError("PostProcessEdit::initFBO()");
+}
+
+void PostProcessEdit::initShaders()
+{
+	shader = new Shader();
+	shader->addStage("./shaders/edit.vert", "", GL_VERTEX_SHADER);
+	shader->addStage("./shaders/edit.frag", "", GL_FRAGMENT_SHADER);
+	shader->install();
+
+	::flushGLError("PostProcessEdit::initShader()");
+}
+
+void PostProcessEdit::run(glm::vec2 pos, EDIT_TYPE editType, GLuint texIn, GLuint texOut)
+{
+    
+
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
+	glBindTexture(GL_TEXTURE_2D, texOut); 
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texOut, 0); // texture dimension determines size of fbo amirite ?
+	if(!::checkFramebuffer(GL_FRAMEBUFFER, "PostProcessEdit::initFBO()"))
+	{
+	    					
+	} 
+    glClearBufferfv(GL_COLOR, 0, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
+    glViewport(0,0,512,512);
+	shader->begin();
+	{
+		{
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texIn);
+            glUniform1i(shader->getUniLoc("textureSampler"), 0);
+		}
+
+        glUniform2fv(shader->getUniLoc("editPos"), 1, glm::value_ptr(pos));
+
+		// TODO: push to parent
+		glBindVertexArray(quadVAO);
+		{
+			glDrawArrays(GL_QUADS, 0, 4);
+		} glBindVertexArray(0);
+	} shader->end();
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    ::flushGLError("PostProcessEdit::run()");
+    glm::ivec2 winSize = GameManager::getInstance()->getWindowDim();
+    glViewport(0,0,winSize.x, winSize.y);
 }
 
 /************************************************************************/

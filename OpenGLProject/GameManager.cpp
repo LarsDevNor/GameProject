@@ -52,7 +52,6 @@ void GameManager::update(float dt)
 	inputManager->update(dt);
 }
 
-
 void GameManager::render()
 {
 	//terrain->render(sceneFBO); // prepare for post processing 

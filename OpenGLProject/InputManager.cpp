@@ -37,12 +37,17 @@ void InputManager::handleMouse(float dt)
 	// first person controls when holding left mouse button 
 
 	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT))
+    {
+        glm::ivec2 currentPos;
+        glfwGetMousePos(&currentPos.x, &currentPos.y);
+        gm->pick(currentPos);
 		leftMouseButtonHeld = true;
+    }
 	else if ( leftMouseButtonHeld )
 	{
-		glm::ivec2 currentPos;
+		/*glm::ivec2 currentPos;
 		glfwGetMousePos(&currentPos.x, &currentPos.y);
-		gm->pick(currentPos);
+		gm->pick(currentPos);*/
 		leftMouseButtonHeld = false;
 	}
 

@@ -13,6 +13,8 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
+uniform sampler2D heightSampler;
+
 layout(location = POSITION) in vec4 pos;
 layout(location = TEXCOORD) in vec2 texcoord;
 
@@ -21,8 +23,9 @@ out vec3 fPos;
 
 void main()
 {
+    float height = texture(heightSampler, texcoord).r;
 	mat4 mvp = proj * view;// * model;
-	vec4 posMVP = mvp * vec4(pos);
+	vec4 posMVP = mvp * vec4(pos.x, height, pos.z, 1.0);
 	gl_Position = posMVP;
 	
 	fTexcoord = texcoord;

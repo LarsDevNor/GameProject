@@ -1,14 +1,20 @@
 #include "stdafx.h"
 
+#include "PostProcess.h"
 #include "GameManager.h"
 #include "PerlinNoise.h"
 #include "Camera.h"
 #include "Shader.h"
 #include "Terrain.h"
 
+/*
 
+	PICKING TODO: First simple version. Take picket position as input to a shader handling heightmap..
+	lift by cos, 1/distFromCentre^2 or something 
 
-Terrain::Terrain() 
+*/
+
+Terrain::Terrain() : heightTextures(2), inputTex(0)
 {
 	gm = GameManager::getInstance();
 
@@ -18,19 +24,29 @@ Terrain::Terrain()
 	//initTextures();
 	//initSamplers();
 	//initFBO();
+
+	editPP = new PostProcessEdit();
 }
 
 void Terrain::initPickingFBO()
 {
+    GLuint pickingRBDepth = 0;
 	// create, bind, and establish storage for renderbuffer 
 	glGenRenderbuffers(1, &pickingRB);
+    glGenRenderbuffers(1, &pickingRBDepth);
 	glBindRenderbuffer(GL_RENDERBUFFER, pickingRB);
 	glm::ivec2 windowDim = gm->getWindowDim();
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, windowDim.x, windowDim.y);
+    glBindRenderbuffer(GL_RENDERBUFFER, pickingRBDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, windowDim.x, windowDim.y);
+
 	// create and bind FBO, attach renderbuffer to it 
 	glGenFramebuffers(1, &pickingFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, pickingFBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, pickingRB);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, pickingRB);
+    glBindRenderbuffer(GL_RENDERBUFFER, pickingRBDepth);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, pickingRBDepth);
 
 	::checkFramebuffer(GL_FRAMEBUFFER, "Terrain::initPickingFBO()");
 
@@ -41,25 +57,36 @@ void Terrain::initPickingFBO()
 
 void Terrain::initGeometry()
 {
-	nVertsHeight = 256;
-	nVertsWidth = 256;
+	nVertsHeight = 512;
+	nVertsWidth = 512;
 	width = 128.0f;
 	height = 128.0f;
-	pn = new PerlinNoise(0.5, 1.25f, 2500/(nVertsHeight+nVertsWidth), 8, 5);
+	pn = new PerlinNoise(0.5, 1.0f, 2500/(nVertsHeight+nVertsWidth), 8, 5);
 
+	double bump = 1.0f;
 	glm::vec2 spacing((float)width / nVertsWidth, (float)height / nVertsHeight);
 	{ // create geometry 
 		for ( size_t i = 0; i < nVertsHeight; ++i ) 
 		for ( size_t j = 0; j < nVertsWidth; ++j )
 		{
-			float vertexHeight = -10.0f + (float)pn->GetHeight(j*0.1f, i*0.1f);
+			//float vertexHeight = -10.0f + (float)pn->GetHeight(j*0.1f, i*0.1f);
+			//float vertexHeight = static_cast<float>(bump*((0.5+pn->GetHeight(j*0.1, i*0.1))-1.0));
+
+            float vertexHeight = 100.0f*static_cast<float>(j)/(nVertsHeight-1);
+            vertexHeight = -10.0f;
+		//	vertexHeight = i*10.1f+j*0.1f;
+		//	vertexHeight = i*1.0f/(nVertsHeight-1);
 			heights.push_back(vertexHeight);
+		//	printf("%g\n", vertexHeight);
 		}
-		
+		//heightTex = createTexture2D(glm::ivec2(nVertsWidth, nVertsHeight), GL_R32F, GL_RED, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, &heights[0]);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		heightTextures[0] = createTexture2D(glm::ivec2(nVertsWidth, nVertsHeight), GL_R32F, GL_RED, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, &heights[0]);
+		heightTextures[1] = createTexture2D(glm::ivec2(nVertsWidth, nVertsHeight), GL_R32F, GL_RED, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, &heights[0]);
+
 		normals = std::vector<glm::vec3>(nVertsWidth*nVertsHeight);
 		std::fill(normals.begin(), normals.end(), glm::vec3(0.0f, 0.0f, 0.0f));
-
-		
 #if 1 // calculate heightmap based normals 
 		for ( size_t i = 1; i < nVertsHeight-1; ++i )
 		for ( size_t j = 1; j < nVertsWidth-1; ++j )
@@ -119,10 +146,14 @@ void Terrain::initGeometry()
 		for ( size_t i = 0; i < nVertsHeight; ++i )
 		for ( size_t j = 0; j < nVertsWidth; ++j )
 		{
-			glm::vec2 normPos((float)j/(nVertsWidth-1), (float)i/(nVertsHeight-1));
+			glm::vec2 normPos((float)(j)/(nVertsWidth-1), (float)(i)/(nVertsHeight-1));
 			glm::vec2 pos = glm::vec2(normPos.x * width, normPos.y * height);
 
-			vertices.push_back(PNTVertex(glm::vec3(pos.x, heights[j+i*nVertsWidth], pos.y), normals[j+i*nVertsWidth], normPos));
+            // remap [0,max] -> [0.5,max-0.5]
+            glm::vec2 texelPos = normPos + (glm::vec2(0.5f, 0.5f) / glm::vec2(glm::vec2(nVertsWidth-1.0f, nVertsHeight-1.0f)));
+            texelPos *= glm::vec2(nVertsWidth-2.0f, nVertsHeight-2.0f)/glm::vec2(nVertsWidth-1.0f, nVertsHeight-1.0f); 
+
+			vertices.push_back( PNTVertex(glm::vec3(pos.x, 0.0f, pos.y), normals[j+i*nVertsWidth], texelPos));
 		}
 		
 		for ( size_t i = 0; i < nVertsHeight-1; ++i )
@@ -162,9 +193,7 @@ void Terrain::initGeometry()
 				glVertexAttribPointer(semantic::attr::NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(PNTVertex), BUFFER_OFFSET(offset));
 				offset += sizeof(glm::vec3);
 				glVertexAttribPointer(semantic::attr::TEXCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(PNTVertex), BUFFER_OFFSET(offset));
-			}
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+			} 
 			glEnableVertexAttribArray(semantic::attr::POSITION);
 			glEnableVertexAttribArray(semantic::attr::NORMAL);
 			glEnableVertexAttribArray(semantic::attr::TEXCOORD);
@@ -189,41 +218,55 @@ void Terrain::initShader()
 
 void Terrain::renderTerrain(Shader* renderShader)
 {
-	int viewLoc = renderShader->getUniLoc("view");
-	int projLoc = renderShader->getUniLoc("proj");
-	//int modelLoc = defaultShader->getUniLoc("model"); 
-	//int camPosLoc = defaultShader->getUniLoc("camPos");
-	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getViewMatrix()));
-	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
-	//glUniform3fv(camPosLoc, 1, glm::value_ptr(-gm->getActiveCamera()->getEye()));
-
-	glBindVertexArray(vao);
+	renderShader->begin();
 	{
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-	} glBindVertexArray(0);
+		int viewLoc = renderShader->getUniLoc("view");
+		int projLoc = renderShader->getUniLoc("proj");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getViewMatrix()));
+		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
 
+		glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, getInputTex());
+		glUniform1i(renderShader->getUniLoc("heightSampler"), 0);
+
+		glBindVertexArray(vao);
+		{
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		} glBindVertexArray(0);
+	} renderShader->end();
 	::flushGLError("Terrain::renderTerrain()");
 }
 
 void Terrain::pick(const glm::ivec2& screenCoord)
 {
+    float pixelValue[4];
 	glBindFramebuffer(GL_FRAMEBUFFER, pickingFBO);
-	pickingShader->begin();
-	renderTerrain(pickingShader);
-	pickingShader->end();
-	float pixelValue[4];
-	glReadPixels( screenCoord.x, screenCoord.y, 1, 1, GL_RGBA, GL_FLOAT, &pixelValue);
-	std::printf("pixel: %g %g %g %g\n", pixelValue[0], pixelValue[1], pixelValue[2], pixelValue[3]);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    {
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+	    glClearBufferfv(GL_COLOR, 0, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
+        const float depthClear = 1.0; // clear to max depth 
+        glClearBufferfv(GL_DEPTH, 0, &depthClear);
+	    renderTerrain(pickingShader);
+	    glReadPixels( screenCoord.x, gm->getWindowDim().y - screenCoord.y, 1, 1, GL_RGBA, GL_FLOAT, &pixelValue);
+    } glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glm::vec2 normPickPos = glm::vec2(pixelValue[0], pixelValue[1]);
+    //std::printf("pixel: %g %g\n", normPickPos.x, normPickPos.y );
+    //std::printf("in: %i out: %i\n", getInputTex(), getOutputTex());
+
+	editPP->run(normPickPos, PostProcessEdit::UP, getInputTex(), getOutputTex());
+	swapTex();
+
 
 	::flushGLError("Terrain::pick()");
 }
 
-// TODO: use a diff shader when no render to FBO s
+// TODO: use a diff shader when not render to FBOs
 void Terrain::render(GLuint fbo)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	if( fbo != 0 )
 	{
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -238,8 +281,11 @@ void Terrain::render(GLuint fbo)
 		const float depthClear = 1.0; // clear to max depth 
 		glClearBufferfv(GL_DEPTH, 0, &depthClear);
 	}
-
-	renderTerrain(pickingShader);
+    //glDisable(GL_CULL_FACE);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	renderTerrain(defaultShader);
+    //renderTerrain(pickingShader);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	if ( fbo != 0)
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);

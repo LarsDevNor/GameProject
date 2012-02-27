@@ -18,9 +18,10 @@ layout(location = FRAG_COLOR_AD0) out vec4 color_ad0;
 layout(location = FRAG_COLOR_AD1) out vec4 color_ad1;
 layout(location = FRAG_COLOR_AD2) out vec4 color_ad2;
 
-in vec2 fTexCoord;
+in vec2 fTexcoord;
 in vec3 fNormal;
 in vec3 fPos;
+in float fHeight;
 //flat in vec3 fFlatPos;
 
 void main()
@@ -47,8 +48,14 @@ void main()
 //	color = vec4(fFlatPos, 1.0);
 
 	color = vec4(vec3(lDotN), 1.0);
-	color = vec4(0.5+0.5*fNormal, 1.0);
-	color_ad0 = vec4(fNormal, 1.0);
-	color_ad1 = vec4(fPos, 1.0);
-	color_ad2 = vec4(fTexCoord, 0.0, 0.0);
+
+    color = vec4((10.0 + fHeight)*0.025, 0.0, 0.05, 1.0);
+
+ //   color = vec4(vec2(fTexcoord), 0.0, 1.0);
+	//color = vec4(0.5+0.5*fNormal, 1.0);
+//	color_ad0 = vec4(fNormal, 1.0);
+//	color_ad1 = vec4(fPos, 1.0);
+//	color_ad2 = vec4(fTexcoord, 0.0, 0.0);
+
+	//color = vec4(fTexcoord.xy, 1.0, 1.0);
 }
