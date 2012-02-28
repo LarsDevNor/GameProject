@@ -49,7 +49,7 @@ PostProcessFog::PostProcessFog()
 void PostProcessFog::initFBO()
 {
 	glGenFramebuffers(1, &fbo);
-	::flushGLError("Terrain::initFBO()");
+	::flushGLError("PostProcessFog::initFBO()");
 }
 
 void PostProcessFog::initShaders()
@@ -69,7 +69,7 @@ void PostProcessFog::run(GLuint colorTexIn, GLuint depthTexIn, GLuint rgbaTexOut
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glBindTexture(GL_TEXTURE_2D, rgbaTexOut); // output to client color texture
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rgbaTexOut, 0);
-		if(!::checkFramebuffer(GL_FRAMEBUFFER, "Terrain::initFBO()"))
+		if(!::checkFramebuffer(GL_FRAMEBUFFER, "PostProcessFog::run()"))
 		{
 			// throw or sth 
 		}
@@ -133,7 +133,7 @@ void PostProcessSSAO::run(GLuint colorTexIn, GLuint normalTexIn, GLuint posTexIn
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 		glBindTexture(GL_TEXTURE_2D, rgbaTexOut); // output to client color texture
 		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, rgbaTexOut, 0);
-		if(!::checkFramebuffer(GL_FRAMEBUFFER, "Terrain::initFBO()"))
+		if(!::checkFramebuffer(GL_FRAMEBUFFER, "PostProcessSSAO::initFBO()"))
 		{
 			// throw or sth 
 		}
@@ -213,7 +213,7 @@ void PostProcessEdit::run(glm::vec2 pos, EDIT_TYPE editType, GLuint texIn, GLuin
 	    					
 	} 
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
-    glViewport(0,0,512,512);
+    glViewport(0,0,1024,1024);
 	shader->begin();
 	{
 		{

@@ -57,10 +57,10 @@ void Terrain::initPickingFBO()
 
 void Terrain::initGeometry()
 {
-	nVertsHeight = 512;
-	nVertsWidth = 512;
-	width = 128.0f;
-	height = 128.0f;
+	nVertsHeight = 1024;
+	nVertsWidth = 1024;
+	width = 1024.0f;
+	height = 1024.0f;
 	pn = new PerlinNoise(0.5, 1.0f, 2500/(nVertsHeight+nVertsWidth), 8, 5);
 
 	double bump = 1.0f;
@@ -206,8 +206,10 @@ void Terrain::initGeometry()
 void Terrain::initShader()
 {
 	defaultShader = new Shader();
-	defaultShader->addStage("./shaders/terrain.vert", "", GL_VERTEX_SHADER);
-	defaultShader->addStage("./shaders/terrain.frag", "", GL_FRAGMENT_SHADER);
+    /*defaultShader->addStage("./shaders/terrain.vert", "", GL_VERTEX_SHADER);
+    defaultShader->addStage("./shaders/terrain.frag", "", GL_FRAGMENT_SHADER);*/
+	defaultShader->addStage("./shaders/terrainSimple.vert", "", GL_VERTEX_SHADER);
+	defaultShader->addStage("./shaders/terrainSimple.frag", "", GL_FRAGMENT_SHADER);
 	defaultShader->install();
 
 	pickingShader = new Shader();
@@ -283,6 +285,9 @@ void Terrain::render(GLuint fbo)
 	}
     //glDisable(GL_CULL_FACE);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    defaultShader->begin();
+    glUniform1f(defaultShader->getUniLoc("spacing"), (float)width / nVertsWidth);
+    defaultShader->end();
 	renderTerrain(defaultShader);
     //renderTerrain(pickingShader);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);

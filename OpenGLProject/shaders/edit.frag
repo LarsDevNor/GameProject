@@ -26,11 +26,11 @@ void main()
     	COLOR_OUT = vec4(vec3(value), 1.0);
 */
     //COLOR_OUT = vec4(value, 0.0, 0.0, 0.0);
-    float strength = 1.0;
+    float strength = 2.5;
 
-    float threshold = 0.2;
+    float threshold = 0.1;
     float proximity = 1.0/threshold * ( threshold - min(threshold,length(fTexcoord - editPos)) );
-    COLOR_OUT = value+pow(strength*proximity, 4);
+    COLOR_OUT = value+strength*pow(proximity, 4);
 
   //  COLOR_OUT = value + strength*sin(proximity * 3.14/2.0);
 

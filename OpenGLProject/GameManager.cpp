@@ -73,6 +73,7 @@ void GameManager::initMainFBO()
 	glGenTextures(1, &sceneDepthTex);
 	glGenTextures(1, &sceneNormalTex);
 	glGenTextures(1, &scenePickingTex);
+    glGenTextures(1, &scenePositionTex);
 
 	{ // color rtt target
 		glBindTexture(GL_TEXTURE_2D, sceneColorTex);
@@ -126,9 +127,9 @@ void GameManager::initMainFBO()
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sceneColorTex, 0);
 	glBindTexture(GL_TEXTURE_2D, sceneNormalTex);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, sceneNormalTex, 0);
-	glBindTexture(GL_TEXTURE_2D, scenePositionTex);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, scenePositionTex, 0);
-	glBindTexture(GL_TEXTURE_2D, scenePickingTex);
+    glBindTexture(GL_TEXTURE_2D, scenePositionTex);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, scenePositionTex, 0); // raises an opengl error 
+    glBindTexture(GL_TEXTURE_2D, scenePickingTex);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, scenePickingTex, 0);
 	glBindTexture(GL_TEXTURE_2D, sceneDepthTex);
 	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, sceneDepthTex, 0);
@@ -137,5 +138,5 @@ void GameManager::initMainFBO()
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-	::flushGLError("Terrain::initFBO() - init fbo ");
+	::flushGLError("GameManager::initFBO() - init fbo ");
 }

@@ -32,10 +32,10 @@ void Camera::init()
 {
 	vpDim = gm->getWindowDim();
 	rotateSpeed = 5.0f;
-	moveSpeed = 100.0f;
+	moveSpeed = 500.0f;
 	fov = 60.0f;
 	near = 1.0f;
-	far = 1000.0f;
+	far = 5000.0f;
 	glViewport(0, 0, vpDim.x, vpDim.y);
 	setProjection();
 
