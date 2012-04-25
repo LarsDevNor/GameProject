@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "Texture.h"
 #include "PostProcess.h"
 #include "GameManager.h"
 #include "PerlinNoise.h"
@@ -57,8 +58,8 @@ void Terrain::initPickingFBO()
 
 void Terrain::initGeometry()
 {
-	nVertsHeight = 1024;
-	nVertsWidth = 1024;
+	nVertsHeight = 512;
+	nVertsWidth = 512;
 	width = 1024.0f;
 	height = 1024.0f;
 	pn = new PerlinNoise(0.5, 1.0f, 2500/(nVertsHeight+nVertsWidth), 8, 5);
@@ -74,19 +75,16 @@ void Terrain::initGeometry()
 
             float vertexHeight = 100.0f*static_cast<float>(j)/(nVertsHeight-1);
             vertexHeight = -10.0f;
-		//	vertexHeight = i*10.1f+j*0.1f;
-		//	vertexHeight = i*1.0f/(nVertsHeight-1);
 			heights.push_back(vertexHeight);
-		//	printf("%g\n", vertexHeight);
 		}
-		//heightTex = createTexture2D(glm::ivec2(nVertsWidth, nVertsHeight), GL_R32F, GL_RED, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, &heights[0]);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		heightTextures[0] = createTexture2D(glm::ivec2(nVertsWidth, nVertsHeight), GL_R32F, GL_RED, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, &heights[0]);
-		heightTextures[1] = createTexture2D(glm::ivec2(nVertsWidth, nVertsHeight), GL_R32F, GL_RED, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, &heights[0]);
+		heightTextures[0] = Texture(glm::ivec2(nVertsWidth, nVertsHeight), GL_R16F, GL_RED, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, &heights[0], true);
+		heightTextures[1] = Texture(glm::ivec2(nVertsWidth, nVertsHeight), GL_R16F, GL_RED, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, &heights[0], true);
 
 		normals = std::vector<glm::vec3>(nVertsWidth*nVertsHeight);
 		std::fill(normals.begin(), normals.end(), glm::vec3(0.0f, 0.0f, 0.0f));
+#if 0
 #if 1 // calculate heightmap based normals 
 		for ( size_t i = 1; i < nVertsHeight-1; ++i )
 		for ( size_t j = 1; j < nVertsWidth-1; ++j )
@@ -120,6 +118,7 @@ void Terrain::initGeometry()
 		}
 #endif 
 
+
 		const size_t smoothingIterations = 4;
 		for ( size_t iteration = 0; iteration < smoothingIterations; ++iteration)
 		for ( size_t i = 1; i < nVertsHeight-1; ++i )
@@ -142,7 +141,7 @@ void Terrain::initGeometry()
 			}
 			normals[j+i*nVertsWidth] = glm::normalize( glm::normalize(normalsAcc) * 0.5f + normals[j+i*nVertsWidth] * 0.5f );
 		}
-
+#endif 
 		for ( size_t i = 0; i < nVertsHeight; ++i )
 		for ( size_t j = 0; j < nVertsWidth; ++j )
 		{
@@ -228,7 +227,8 @@ void Terrain::renderTerrain(Shader* renderShader)
 		glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(gm->getActiveCamera()->getProjMatrix()));
 
 		glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, getInputTex());
+        //glBindTexture(GL_TEXTURE_2D, getInputTex());
+        getInputTex().bind();
 		glUniform1i(renderShader->getUniLoc("heightSampler"), 0);
 
 		glBindVertexArray(vao);
@@ -241,7 +241,7 @@ void Terrain::renderTerrain(Shader* renderShader)
 	::flushGLError("Terrain::renderTerrain()");
 }
 
-void Terrain::pick(const glm::ivec2& screenCoord)
+glm::vec2 Terrain::pick(const glm::ivec2& screenCoord)
 {
     float pixelValue[4];
 	glBindFramebuffer(GL_FRAMEBUFFER, pickingFBO);
@@ -255,15 +255,9 @@ void Terrain::pick(const glm::ivec2& screenCoord)
 	    glReadPixels( screenCoord.x, gm->getWindowDim().y - screenCoord.y, 1, 1, GL_RGBA, GL_FLOAT, &pixelValue);
     } glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glm::vec2 normPickPos = glm::vec2(pixelValue[0], pixelValue[1]);
-    //std::printf("pixel: %g %g\n", normPickPos.x, normPickPos.y );
-    //std::printf("in: %i out: %i\n", getInputTex(), getOutputTex());
+    ::flushGLError("Terrain::pick()");
+    return glm::vec2(pixelValue[0], pixelValue[1]);;
 
-	editPP->run(normPickPos, PostProcessEdit::UP, getInputTex(), getOutputTex());
-	swapTex();
-
-
-	::flushGLError("Terrain::pick()");
 }
 
 // TODO: use a diff shader when not render to FBOs

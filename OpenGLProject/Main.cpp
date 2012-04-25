@@ -18,14 +18,21 @@ void run();
 
 int main(int argc, char** argv)
 {
-	if (!init())
-	{
-		std::cerr << "failed to init glfw stuff\n";
-		std::cin.get();
-		return 1;
-	}
-
-	run();
+    try
+    {
+	    if (!init())
+	    {
+		    std::cerr << "failed to init glfw stuff\n";
+		    std::cin.get();
+		    return 1;
+	    }
+	    run();
+    } catch(std::runtime_error & e) {
+        std::cerr << "\n\n****************************************\n";
+        std::cerr << "RUNTIME EXCEPTION:\n " << e.what();
+        std::cerr << "****************************************";
+        std::cin.get();
+    }
 
 	return 0;
 }
@@ -46,7 +53,7 @@ bool init()
 		glfwTerminate();
 		return false;
 	}
-
+    
 	glfwSetWindowPos(200, 200);
 
 	GLenum e = glewInit();
@@ -79,16 +86,17 @@ void run()
 	int frameCount = 0;
 	double elapsed = 0.0f;
 
-	while ( running ) 
-	{
-		float dt = (float)(glfwGetTime() - prevTime);
-		prevTime = (float)glfwGetTime();
+    while ( running ) 
+    {
+	    float dt = (float)(glfwGetTime() - prevTime);
+	    prevTime = (float)glfwGetTime();
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		gm->Tick(dt);
+	    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	    gm->Tick(dt);
 
-		glfwSwapBuffers();
-		running = glfwGetWindowParam(GLFW_OPENED) & (gm->getRunning() ? 1:0);
-	}
+	    glfwSwapBuffers();
+	    running = glfwGetWindowParam(GLFW_OPENED) & (gm->getRunning() ? 1:0);
+    }
+
 }
 

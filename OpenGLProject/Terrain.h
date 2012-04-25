@@ -4,9 +4,13 @@ class Shader;
 class GameManager;
 class PerlinNoise;
 class PostProcessEdit;
+class TerrainEditor;
+class ParticleSystem;
 
 class Terrain
 {
+public:
+    enum EDIT_TYPE { edit_up, edit_down};
 public:
 	Terrain();
 
@@ -20,9 +24,12 @@ public:
 
 	void render(GLuint sceneFBO);
 	void renderTerrain(Shader* renderShader);
-	void pick(const glm::ivec2& screenCoord);
+	/*void edit(const glm::ivec2& screenCoord);*/
+    glm::vec2 pick(const glm::ivec2& screenCoord);
 	//void renderFullscreenQuad();
 
+    float getWidth() const { return width; }
+    float getHeight() const { return height; }
 private:
 	void calcNormals();
 
@@ -37,15 +44,11 @@ private:
 	 
 	//std::vector<GLuint> 
 	size_t inputTex; 
-	std::vector<GLuint> heightTextures;
+	std::vector<Texture> heightTextures;
 	void swapTex() { inputTex = (inputTex==0) ? 1 : 0; }
-	GLuint getInputTex() { return heightTextures[inputTex]; }
-	GLuint getOutputTex() { return (inputTex==0) ? heightTextures[1] : heightTextures[0] ; }
+	const Texture& getInputTex() { return heightTextures[inputTex]; }
+	const Texture& getOutputTex() { return (inputTex==0) ? heightTextures[1] : heightTextures[0] ; }
 
-	GLuint heightTex;
-	GLuint colorTex;
-	GLuint normalTex;
-	GLuint depthTex;
 	GLuint defaultSampler; // linear, clamp 
 	std::vector<glm::vec3> normals;
 	std::vector<float> heights;
@@ -65,4 +68,7 @@ private:
 	PerlinNoise* pn;
 private:
 	PostProcessEdit* editPP;
+private:
+    friend TerrainEditor;
+    friend ParticleSystem;
 };

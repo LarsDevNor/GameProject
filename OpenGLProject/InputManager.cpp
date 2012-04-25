@@ -3,9 +3,11 @@
 #include "Shader.h"
 #include "GL/glfw.h"
 
+#include "TerrainEditor.h"
 #include "GameManager.h"
 #include "Camera.h"
 #include "InputManager.h"
+#include "Terrain.h"
 
 
 InputManager::InputManager()
@@ -34,13 +36,14 @@ void InputManager::update(float dt)
 
 void InputManager::handleMouse(float dt)
 {
-	// first person controls when holding left mouse button 
+	// first person controls    when holding left mouse button 
+    // terrain editing          when holding right mouse button 
 
 	if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_LEFT))
     {
         glm::ivec2 currentPos;
         glfwGetMousePos(&currentPos.x, &currentPos.y);
-        gm->pick(currentPos);
+        gm->getTED()->run(currentPos);
 		leftMouseButtonHeld = true;
     }
 	else if ( leftMouseButtonHeld )
@@ -95,6 +98,16 @@ void InputManager::handleKeyboard(float dt)
 	{
 		gm->getActiveCamera()->moveLeft(-dt);
 	}	
+
+    if(glfwGetKey('C'))
+    {
+        bufferPrev['C'] = 1;
+    }
+    else if(bufferPrev['C'])
+    {
+        gm->getTED()->nextConfig();
+        bufferPrev['C'] = 0;
+    }
 
 	if(glfwGetKey(GLFW_KEY_ESC))
 		exit(0);

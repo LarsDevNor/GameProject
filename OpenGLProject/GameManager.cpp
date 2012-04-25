@@ -3,7 +3,10 @@
 #include "glm/gtc/matrix_projection.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
+#include "ParticleSystem.h"
+#include "CLManager.h"
 #include "Terrain.h"
+#include "TerrainEditor.h"
 #include "Camera.h"
 #include "InputManager.h"
 #include "GameManager.h"
@@ -25,13 +28,17 @@ GameManager::GameManager() : flushError(false), running(true)
 void GameManager::init(const glm::ivec2& _windowDim) 
 {
 	windowDim = _windowDim;
+    
+    clManager = CLManager::getInstance();
 
 	cameraDefault = new Camera();
 	terrain = new Terrain();
+    ted = new TerrainEditor(terrain);
 	inputManager = new InputManager();
 	initMainFBO();
 	ppFog = new PostProcessFog();
 	ppSSAO = new PostProcessSSAO();
+    particleSystem = new ParticleSystem();
 }
 
 GameManager::~GameManager()
@@ -59,80 +66,38 @@ void GameManager::render()
 
 	//ppSSAO->run(sceneColorTex, sceneNormalTex, scenePositionTex, sceneDepthTex);
 	//ppFog->run(sceneColorTex, sceneDepthTex); 
-}	
 
-void GameManager::pick(const glm::ivec2& screenCoord)
-{
-	terrain->pick(screenCoord);
-}
+    particleSystem->render();
+}	
 
 void GameManager::initMainFBO()
 {
-	glActiveTexture(GL_TEXTURE0);
-	glGenTextures(1, &sceneColorTex);
-	glGenTextures(1, &sceneDepthTex);
-	glGenTextures(1, &sceneNormalTex);
-	glGenTextures(1, &scenePickingTex);
-    glGenTextures(1, &scenePositionTex);
-
-	{ // color rtt target
-		glBindTexture(GL_TEXTURE_2D, sceneColorTex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, windowDim.x, windowDim.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	}
-	{ // normal rtt target 
-		glBindTexture(GL_TEXTURE_2D, sceneNormalTex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, windowDim.x, windowDim.y, 0, GL_RGBA, GL_FLOAT, 0);
-	}
-	{ // position rtt target 
-		glBindTexture(GL_TEXTURE_2D, scenePositionTex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, windowDim.x, windowDim.y, 0, GL_RGBA, GL_FLOAT, 0);
-	}
-	{ // depth rtt target 
-		glBindTexture(GL_TEXTURE_2D, sceneDepthTex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, windowDim.x, windowDim.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-	}
-	{ // picking ID target 
-		glBindTexture(GL_TEXTURE_2D, scenePickingTex);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, windowDim.x, windowDim.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);	
-	}
+    sceneColorTex = Texture(windowDim, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR, GL_CLAMP_TO_EDGE, 0);
+    {
+        sceneDepthTex = Texture(windowDim, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT, GL_FLOAT, GL_NEAREST, GL_CLAMP_TO_EDGE, 0);
+        sceneDepthTex.bind();
+        glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_INTENSITY);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_NONE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+    }
+	sceneNormalTex = Texture(windowDim, GL_RGBA16, GL_RGBA, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, 0);
+	scenePickingTex = Texture(windowDim, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR, GL_CLAMP_TO_EDGE, 0);
+    scenePositionTex = Texture(windowDim, GL_RGBA16, GL_RGBA, GL_FLOAT, GL_LINEAR, GL_CLAMP_TO_EDGE, 0);
 
 	::flushGLError("GameManager::initTextures() - int rtt textures");
 
 	glGenFramebuffers(1, &sceneFBO);
 	glBindFramebuffer(GL_FRAMEBUFFER, sceneFBO);
-	glBindTexture(GL_TEXTURE_2D, sceneColorTex);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sceneColorTex, 0);
-	glBindTexture(GL_TEXTURE_2D, sceneNormalTex);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, sceneNormalTex, 0);
-    glBindTexture(GL_TEXTURE_2D, scenePositionTex);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, scenePositionTex, 0); // raises an opengl error 
-    glBindTexture(GL_TEXTURE_2D, scenePickingTex);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, scenePickingTex, 0);
-	glBindTexture(GL_TEXTURE_2D, sceneDepthTex);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, sceneDepthTex, 0);
+    sceneColorTex.bind();
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, sceneColorTex.get(), 0);
+	sceneNormalTex.bind();
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, sceneNormalTex.get(), 0);
+    scenePositionTex.bind();
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, scenePositionTex.get(), 0);
+    scenePickingTex.bind();
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, scenePickingTex.get(), 0);
+	sceneDepthTex.bind();
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, sceneDepthTex.get(), 0);
 
 	::checkFramebuffer(GL_FRAMEBUFFER, "Terrain::initFBO()");
 

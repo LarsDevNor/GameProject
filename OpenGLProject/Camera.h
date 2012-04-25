@@ -40,8 +40,8 @@ private:
 	float rotateSpeed;
 
 	float fov;
-	float near;
-	float far;
+	float nearPlane;
+	float farPlane;
 
 	glm::ivec2 vpDim;
 

@@ -49,6 +49,7 @@ bool Shader::install()
 	{
 		printf("*** Using fixed function pipeline ***\n");
 		printf("--------------------------------\n");
+        throw std::runtime_error("Shader compile failed\n");
 		return false;
 	}
 
@@ -67,6 +68,7 @@ bool Shader::install()
 		printf("linking of shader failed...\n");
 		printf("*** Using fixed function pipeline ***\n");
 		printf("--------------------------------\n");
+        throw std::runtime_error("Shader link failed\n");
 		return false;
 	}
 	glUseProgram(program); // turn on programmable pipeline
@@ -75,7 +77,8 @@ bool Shader::install()
 
 	return true;
 }
-
+#pragma warning(push)
+#pragma warning(disable:4996)
 const GLchar* Shader::LoadShaderText(const char *fileName)
 {
     char* shaderText = NULL;
@@ -99,7 +102,7 @@ const GLchar* Shader::LoadShaderText(const char *fileName)
     }
     return shaderText;
 }
-
+#pragma warning(pop)
 
 void Shader::printShaderInfoLog(GLuint shader)
 {

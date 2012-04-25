@@ -32,10 +32,10 @@ void Camera::init()
 {
 	vpDim = gm->getWindowDim();
 	rotateSpeed = 5.0f;
-	moveSpeed = 500.0f;
+	moveSpeed = 50.0f;
 	fov = 60.0f;
-	near = 1.0f;
-	far = 5000.0f;
+	nearPlane = 1.0f;
+	farPlane = 5000.0f;
 	glViewport(0, 0, vpDim.x, vpDim.y);
 	setProjection();
 
@@ -51,7 +51,7 @@ void Camera::init()
 void Camera::setProjection()
 {
 	float aspect =  (float)vpDim.x / vpDim.y;
-	projMatrix = glm::perspective(fov, aspect, near, far);
+	projMatrix = glm::perspective(fov, aspect, nearPlane, farPlane);
 }
 
 

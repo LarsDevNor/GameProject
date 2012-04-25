@@ -200,29 +200,30 @@ void PostProcessEdit::initShaders()
 	::flushGLError("PostProcessEdit::initShader()");
 }
 
-void PostProcessEdit::run(glm::vec2 pos, EDIT_TYPE editType, GLuint texIn, GLuint texOut)
+void PostProcessEdit::run(glm::vec2 pos, float radius, float strength, const Texture& texIn, const Texture& texOut)
 {
-    
-
 	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-	glBindTexture(GL_TEXTURE_2D, texOut); 
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texOut, 0); // texture dimension determines size of fbo amirite ?
+    texOut.bind();
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texOut.get(), 0); // texture dimension determines size of fbo amirite ?
 	if(!::checkFramebuffer(GL_FRAMEBUFFER, "PostProcessEdit::initFBO()"))
 	{
 	    					
 	} 
     glClearBufferfv(GL_COLOR, 0, glm::value_ptr(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f)));
-    glViewport(0,0,1024,1024);
+    glViewport(0,0,texOut.getDim().x,texOut.getDim().y);
 	shader->begin();
 	{
 		{
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, texIn);
+            texIn.bind();
             glUniform1i(shader->getUniLoc("textureSampler"), 0);
 		}
 
+        // caller influenced 
         glUniform2fv(shader->getUniLoc("editPos"), 1, glm::value_ptr(pos));
+        glUniform1f(shader->getUniLoc("threshold"), radius);
+        glUniform1f(shader->getUniLoc("strength"), strength);
 
 		// TODO: push to parent
 		glBindVertexArray(quadVAO);

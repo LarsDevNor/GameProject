@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bitset>
+
 class GameManager;
 
 class InputManager
@@ -19,4 +21,9 @@ private:
     bool leftMouseButtonHeld;
     bool rightMouseButtonJustClicked;
     glm::ivec2 anchorPos;
+
+private:
+    static const int GAME_KEY_C = 0;
+    static const int N_KEYS = 1;
+    std::bitset<1024> bufferPrev;
 };

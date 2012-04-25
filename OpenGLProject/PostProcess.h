@@ -47,15 +47,12 @@ private:
 class PostProcessEdit : PostProcess
 {
 public:
-	enum EDIT_TYPE { UP, DOWN };
-public:
 	PostProcessEdit ();
 	virtual void initShaders();
-	virtual void run(glm::vec2 pos, EDIT_TYPE editType, GLuint texIn, GLuint texOut);
+	virtual void run(glm::vec2 pos, float radius, float strength, const Texture& texIn, const Texture& texOut);
 protected:
 	virtual void initFBO();
 private:
-	EDIT_TYPE editType;
 	Shader* shader;
 	GLuint depthTex;
 	GLuint fbo;

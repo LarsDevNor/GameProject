@@ -1,15 +1,13 @@
 #pragma once
 
-#include <vector>
-#include <iostream>
-
-#include "GL/glfw.h"
-
 class Camera;
 class Terrain;
 class InputManager;
 class PostProcessFog;
 class PostProcessSSAO;
+class TerrainEditor;
+class CLManager;
+class ParticleSystem;
 
 class GameManager
 {
@@ -21,13 +19,14 @@ public:
 	void Tick(float dt);
 	void toggleFlushError() { flushError = !flushError; (flushError) ? printf("Flusing GLError") : printf("Stopped Flusing GLError"); }
 	void toggleVSync() { vSync = !vSync; vSync ? glfwSwapInterval(1) : glfwSwapInterval(0); }
-	void pick(const glm::ivec2& screenCoord);
 public:
 	void setRunning(bool _running) 	{ running = _running; }
 	bool getRunning() const 		{ return running; }
 	Camera* getActiveCamera() 		{ return cameraDefault; }
 	void setWindowDim(const glm::ivec2& _windowDim) { windowDim = _windowDim; }
 	glm::ivec2 getWindowDim () const { return windowDim; }
+    Terrain* getTerrain() const { return terrain; }
+    TerrainEditor* getTED() const { return ted; }
 
 private:
 	static GameManager* instance;
@@ -41,17 +40,21 @@ private:
 	bool running;
 	Camera* cameraDefault;
 	Terrain* terrain;
+    TerrainEditor* ted;
+    CLManager* clManager;
 	InputManager* inputManager;
 	glm::ivec2 windowDim;
 
-	GLuint sceneColorTex;
-	GLuint sceneDepthTex;
-	GLuint sceneNormalTex;
-	GLuint scenePositionTex;
-	GLuint scenePickingTex;
+	Texture sceneColorTex;
+	Texture sceneDepthTex;
+	Texture sceneNormalTex;
+	Texture scenePositionTex;
+	Texture scenePickingTex;
 	GLuint sceneFBO;
 
 	PostProcessFog* ppFog;
 	PostProcessSSAO* ppSSAO;
+
+    ParticleSystem* particleSystem;
 };
 

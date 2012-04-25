@@ -20,7 +20,7 @@ in vec3 fPos;
 
 void main()
 {
-	vec3 lightDir = normalize(vec3(-2.0, -1.0, 0.0));
+	vec3 lightDir = normalize(vec3(0.0, -1.0, 0.0));
 
 	//float lDotN = dot(lightDir, normalize(fNormal));
     
@@ -38,4 +38,6 @@ void main()
     float heightAdjusted = max(0.0, (10.0 + fHeight)*0.015);
 
     COLOR_OUT = vec4(heightAdjusted, LDotN*LDotN, 0.0, 1.0);
+
+    COLOR_OUT = vec4(vec3(LDotN), 1.0);
 }
