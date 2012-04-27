@@ -4,6 +4,11 @@ class CLManager;
 class Shader;
 class GameManager;
 
+struct ParticleSim
+{
+    glm::vec4 speed;
+};
+
 class ParticleSystem
 {
 public:
@@ -13,18 +18,17 @@ public:
 
 private:
     void initVBO();
-private:
 
+private:
     CLManager* clManager;
     GameManager* gm;
 
     cl::Program program;
     cl::Kernel particleKernel;
-
-    cl::BufferGL clBuf;
+    cl::BufferGL renderBuffer;
+    cl::Buffer simBuffer;
     GLuint glBuf;
     GLuint vao;
-
     cl::Image2DGL clTex;
 
     unsigned int dim;
