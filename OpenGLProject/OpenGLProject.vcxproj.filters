@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Resource Files\kernels">
+      <UniqueIdentifier>{7a31c80d-aec1-4cfd-8a5b-72cf382c3843}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -48,6 +51,21 @@
     <ClInclude Include="ShaderManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainEditor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CLManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\ProgramData\NVIDIA Corporation\NVIDIA GPU Computing SDK 4.0\OpenCL\common\inc\CL\cl.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -80,6 +98,18 @@
     <ClCompile Include="ShaderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainEditor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CLManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\terrain.frag">
@@ -98,6 +128,42 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="shaders\fog.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\SSAO.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\SSAO.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\edit.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\edit.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\pickingTerrain.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\pickingTerrain.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\terrainSimple.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\terrainSimple.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\particle.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\particle.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="kernels\particles.cl">
+      <Filter>Resource Files\kernels</Filter>
+    </None>
+    <None Include="shaders\particle.geom">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
