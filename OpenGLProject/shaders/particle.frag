@@ -14,9 +14,9 @@ void main()
 {
     COLOR_OUT = vec4(0.0, 1.0, 0.0, 1.0);
 
-    float dist = pow( 1.0/0.2 * length(fOffset), 4.0);
+    float dist = pow( 1.0/0.2 * length(fOffset), 1.0);
     float inter = smoothstep(0.0, 1.0, dist);
     COLOR_OUT = mix(vec4(1.0, 0.2, 0.0, 1.0), vec4(1.0, 1.0, 1.0, 0.0), inter);
 
-    //COLOR_OUT = vec4(fColor.rgb, 1.0);
+    COLOR_OUT = vec4(fColor.rgb, 1.0);
 }

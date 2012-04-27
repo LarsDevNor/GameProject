@@ -13,12 +13,15 @@ uniform mat4 view;
 uniform mat4 proj;
 
 //out vec4 fColor;
+out vec4 gPos;
+out vec4 gColor;
 
 void main()
 {
 #if 1 
-    gl_Position = pos;
-    //fColor = color;	
+    //gl_Position = pos;
+    gPos = pos;
+    gColor = color;	
 #else
     mat4 mvp = proj * view; //model;
 	vec4 posMVP = mvp * pos;

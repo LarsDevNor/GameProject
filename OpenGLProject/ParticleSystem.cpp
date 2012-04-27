@@ -7,7 +7,7 @@
 #include "CLManager.h"
 #include "ParticleSystem.h"
 
-ParticleSystem::ParticleSystem() : dim(128<<1)
+ParticleSystem::ParticleSystem() : dim(128<<0)
 {
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glPointSize(5.0f);
@@ -35,14 +35,19 @@ void ParticleSystem::initVBO()
     cl_int err = CL_SUCCESS;
 
     size_t elementNumb = dim*dim;
+    // particle render parametere
     std::vector<ParticleVertex> particleBuf(elementNumb);
+    // particle simulation parameters
+    std::vector<ParticleSim> simParticleBuf(elementNumb);
 
-    float spacing = 0.3f;
+    glm::vec4 basePos(100.0f, 0.0f, 100.0f, 0.0f);
+    float spacing = 0.5f;
     for (size_t i = 0; i < dim; ++i)
     for (size_t j = 0; j < dim; ++j)
     {
-        particleBuf[j+i*dim].color = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
-        particleBuf[j+i*dim].pos = glm::vec4((float)i*spacing, 0.0, (float)j*spacing, 1.0);
+        particleBuf[j+i*dim].color      = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+        particleBuf[j+i*dim].pos        = basePos + glm::vec4((float)i*spacing, 0.0, (float)j*spacing, 1.0);
+        simParticleBuf[j+i*dim].speed   = glm::vec4(randNormNegPos()*0.05, 0.05f + 0.2f*randNormPos(), randNormNegPos()*0.05, 0.0f);
     }
 
     glGenVertexArrays(1, &vao);
@@ -59,10 +64,13 @@ void ParticleSystem::initVBO()
     glEnableVertexAttribArray(semantic::attr::PARTICLE_POSITION);
     glEnableVertexAttribArray(semantic::attr::PARTICLE_COLOR);
 
-    clBuf = cl::BufferGL(clManager->context, CL_MEM_READ_WRITE, glBuf, &err);
+    renderBuffer = cl::BufferGL(clManager->context, CL_MEM_READ_WRITE, glBuf, &err);
     CLErr(err);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
+    simBuffer = cl::Buffer(clManager->context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR, elementNumb*sizeof(ParticleSim), &simParticleBuf[0], &err);
+    CLErr(err);
 } 
 
 ParticleSystem::~ParticleSystem()
@@ -71,17 +79,12 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::render() 
 {
-    // Create CL Texture Object from terrain heightmap texture, put it in the terrain class. pass it as an arg to kernel
-    // first try adjusting height of particles relative to terrain height
-    //clTex = cl::Image2DGL(clManager->context, CL_MEM_READ_WRITE, GL_TEXTURE_2D, 0, /*GL TEX OBJ*/0, &err);
-    //CLErr(err);
-
-    // SIMULATE 
+    // SIMULATE with OpenCL 
 
     cl_int err = CL_SUCCESS;
     
     std::vector<cl::Memory>* glVec = new std::vector<cl::Memory>();
-    glVec->push_back(clBuf);
+    glVec->push_back(renderBuffer);
     cl::Image2DGL heightTex = gm->getTerrain()->getInputTex().getCL();
     glVec->push_back(heightTex);
 
@@ -90,20 +93,23 @@ void ParticleSystem::render()
 
     float terrainWidth  = gm->getTerrain()->getWidth();
     float terrainHeight = gm->getTerrain()->getHeight();
-    particleKernel.setArg(0, sizeof(&clBuf), &clBuf); 
-    particleKernel.setArg(1, sizeof(&heightTex), &heightTex);
-    particleKernel.setArg(2, sizeof(float), &terrainWidth);
-    particleKernel.setArg(3, sizeof(float), &terrainHeight);
+    size_t argNum = 0;
+    particleKernel.setArg(argNum++, sizeof(&renderBuffer), &renderBuffer); 
+    particleKernel.setArg(argNum++, sizeof(&simBuffer), &simBuffer);
+    particleKernel.setArg(argNum++, sizeof(&heightTex), &heightTex);
+    particleKernel.setArg(argNum++, sizeof(float), &terrainWidth);
+    particleKernel.setArg(argNum++, sizeof(float), &terrainHeight);
     
     clManager->queue.enqueueNDRangeKernel(particleKernel, cl::NullRange, cl::NDRange(dim*dim,1), cl::NDRange((dim*dim<128)?dim*dim:128,1)); 
     
     clManager->queue.enqueueReleaseGLObjects(glVec, nullptr, nullptr);
     clManager->queue.finish();
 
-    // RENDER 
+    // RENDER with OpenGL 
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);
     shader->begin(); 
     {
         int viewLoc = shader->getUniLoc("view");
@@ -117,5 +123,6 @@ void ParticleSystem::render()
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
     } shader->end();
+    glDepthMask(GL_TRUE);
     glDisable(GL_BLEND);
 }

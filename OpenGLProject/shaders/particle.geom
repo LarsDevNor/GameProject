@@ -14,44 +14,51 @@ layout(triangle_strip, max_vertices = 4) out;
 
 //in vec4 gColor;
 
+in vec4 gPos[];
+in vec4 gColor[];
+
 out vec4 fColor;
 out vec2 fOffset;
 
 void main()
 {
     mat4 mvp = proj * view; //model;
-    float size = 0.2;
+    float size = 0.3;
     vec2 offset = vec2(0.0, 0.0);
     vec4 eyePos; 
 
     for ( int i = 0; i < gl_in.length(); ++i )
     {
-        eyePos = mvp * gl_in[i].gl_Position; 
+        //eyePos = mvp * gl_in[i].gl_Position; 
+        eyePos = mvp * gPos[i]; 
         offset = vec2(size, -size);
         gl_Position = eyePos + vec4(offset.xy, 0.0, 0.0);
         fOffset = offset;
-		fColor = vec4(1.0, 0.0, 0.0, 1.0);
+		fColor = gColor[i];
 		EmitVertex();
 
-        eyePos = mvp * gl_in[i].gl_Position; 
+        //eyePos = mvp * gl_in[i].gl_Position; 
+        eyePos = mvp * gPos[i]; 
         offset = vec2(size, size);
         gl_Position = eyePos + vec4(offset.xy, 0.0, 0.0);
         fOffset = offset;
-		fColor = vec4(0.0, 1.0, 0.0, 1.0);
+		fColor = gColor[i];
 		EmitVertex();
 
-        eyePos = mvp * gl_in[i].gl_Position; 
+        //eyePos = mvp * gl_in[i].gl_Position; 
+        eyePos = mvp * gPos[i]; 
         offset = vec2(-size, -size);
         gl_Position = eyePos + vec4(offset.xy, 0.0, 0.0);
         fOffset = offset;
-		fColor = vec4(0.0, 0.0, 1.0, 1.0);
+		fColor = gColor[i];
 		EmitVertex();
 
-        eyePos = mvp * gl_in[i].gl_Position; 
+        //eyePos = mvp * gl_in[i].gl_Position; 
+        eyePos = mvp * gPos[i]; 
         offset = vec2(-size, size);
         gl_Position = eyePos + vec4(offset.xy, 0.0, 0.0);
         fOffset = offset;
-		fColor = vec4(0.0, 0.0, 1.0, 1.0);
+		fColor = gColor[i];
 		EmitVertex();
     }
 }
