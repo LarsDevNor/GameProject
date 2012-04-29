@@ -8,7 +8,7 @@
 #include "Camera.h"
 #include "InputManager.h"
 #include "Terrain.h"
-
+#include "Player.h"
 
 InputManager::InputManager()
 {
@@ -16,6 +16,7 @@ InputManager::InputManager()
 	gm = GameManager::getInstance();
 	leftMouseButtonHeld 	= false;
 	rightMouseButtonJustClicked = false;
+	player = gm->getPlayer();
 }
 
 InputManager::~InputManager()
@@ -62,8 +63,8 @@ void InputManager::handleMouse(float dt)
 		glm::ivec2 deltaPos = currentPos - anchorPos;
 
 		glfwSetMousePos(anchorPos.x, anchorPos.y);
-		gm->getActiveCamera()->rotateY(dt*(float)deltaPos.x);
-		gm->getActiveCamera()->rotateX(dt*(float)deltaPos.y);
+		player->rotateY(dt*(float)deltaPos.x);
+		player->rotateX(dt*(float)deltaPos.y);
 		glfwDisable(GLFW_MOUSE_CURSOR);
 	}
 	else if (glfwGetMouseButton(GLFW_MOUSE_BUTTON_RIGHT))
@@ -83,20 +84,20 @@ void InputManager::handleKeyboard(float dt)
 {
 	if (glfwGetKey('W'))
 	{
-		gm->getActiveCamera()->moveForward(dt);
+		player->moveForward(dt);
 	}
 	else if(glfwGetKey('S'))
 	{
-		gm->getActiveCamera()->moveForward(-dt);
+		player->moveForward(-dt);
 	}
 	
 	if(glfwGetKey('A'))
 	{
-		gm->getActiveCamera()->moveLeft(dt);
+		player->moveLeft(dt);
 	}
 	else if(glfwGetKey('D'))
 	{
-		gm->getActiveCamera()->moveLeft(-dt);
+		player->moveLeft(-dt);
 	}	
 
     if(glfwGetKey('C'))

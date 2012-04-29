@@ -7,7 +7,7 @@
 #include "CLManager.h"
 #include "ParticleSystem.h"
 
-ParticleSystem::ParticleSystem() : dim(128<<0)
+ParticleSystem::ParticleSystem() : dim(1<<0)
 {
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
     glPointSize(5.0f);

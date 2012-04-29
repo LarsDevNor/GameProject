@@ -8,6 +8,7 @@ class PostProcessSSAO;
 class TerrainEditor;
 class CLManager;
 class ParticleSystem;
+class Player;
 
 class GameManager
 {
@@ -22,11 +23,12 @@ public:
 public:
 	void setRunning(bool _running) 	{ running = _running; }
 	bool getRunning() const 		{ return running; }
-	Camera* getActiveCamera() 		{ return cameraDefault; }
+	Camera* getActiveCamera();
 	void setWindowDim(const glm::ivec2& _windowDim) { windowDim = _windowDim; }
 	glm::ivec2 getWindowDim () const { return windowDim; }
     Terrain* getTerrain() const { return terrain; }
     TerrainEditor* getTED() const { return ted; }
+	Player * getPlayer() const {return player; }
 
 private:
 	static GameManager* instance;
@@ -38,7 +40,8 @@ private:
 	bool flushError;
 	bool vSync;
 	bool running;
-	Camera* cameraDefault;
+
+	Player * player;
 	Terrain* terrain;
     TerrainEditor* ted;
     CLManager* clManager;

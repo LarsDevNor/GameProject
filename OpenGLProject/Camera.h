@@ -26,9 +26,10 @@ public:
 	glm::mat4 &getProjMatrix() { return projMatrix; }
 
 	float getFov() const { return fov; }
+	void updateView();
 
 private:
-	void updateView();
+	
 	glm::mat4 viewMatrix;
 	glm::mat4 projMatrix;
 

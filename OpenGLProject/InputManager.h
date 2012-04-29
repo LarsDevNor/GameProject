@@ -3,7 +3,7 @@
 #include <bitset>
 
 class GameManager;
-
+class Player;
 class InputManager
 {
 public:
@@ -21,6 +21,8 @@ private:
     bool leftMouseButtonHeld;
     bool rightMouseButtonJustClicked;
     glm::ivec2 anchorPos;
+	Player * player;
+
 
 private:
     static const int GAME_KEY_C = 0;

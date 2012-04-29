@@ -11,6 +11,7 @@
 #include "InputManager.h"
 #include "GameManager.h"
 #include "PostProcess.h"
+#include "Player.h"
 
 GameManager* GameManager::instance = 0x0;
 GameManager* GameManager::getInstance()
@@ -31,7 +32,8 @@ void GameManager::init(const glm::ivec2& _windowDim)
     
     clManager = CLManager::getInstance();
 
-	cameraDefault = new Camera();
+//	cameraDefault = new Camera();
+	player = new Player();
 	terrain = new Terrain();
     ted = new TerrainEditor(terrain);
 	inputManager = new InputManager();
@@ -104,4 +106,9 @@ void GameManager::initMainFBO()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 	::flushGLError("GameManager::initFBO() - init fbo ");
+}
+
+Camera* GameManager::getActiveCamera()
+{
+	return &player->getCamera();
 }
