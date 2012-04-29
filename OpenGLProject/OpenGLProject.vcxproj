@@ -86,6 +86,7 @@
     <ClInclude Include="CLManager.h" />
     <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="PerlinNoise.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="PostProcess.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="ShaderManager.h" />
@@ -103,6 +104,7 @@
     <ClCompile Include="CLManager.cpp" />
     <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="PerlinNoise.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="PostProcess.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
